@@ -43,6 +43,7 @@ interface ExpenseContextType {
     homeTotal: number;
     currentMonthTotal: number;
     exportData: (format: 'json' | 'csv') => void;
+    importData: (file: File) => Promise<{ expenses: number; categories: number }>;
     exportSettings: ExportSettings;
     setExportSettings: (settings: ExportSettings) => void;
 }
@@ -155,6 +156,34 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         setExportSettings({ ...exportSettings, lastExport: Date.now() });
     };
 
+    const importData = async (file: File): Promise<{ expenses: number; categories: number }> => {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        let importedExpenses = 0;
+        let importedCategories = 0;
+
+        if (data.expenses && Array.isArray(data.expenses)) {
+            const existingIds = new Set(expenses.map(e => e.id));
+            const newExpenses = data.expenses.filter((e: Expense) => !existingIds.has(e.id));
+            if (newExpenses.length > 0) {
+                saveExpenses([...newExpenses, ...expenses]);
+                importedExpenses = newExpenses.length;
+            }
+        }
+
+        if (data.categories && Array.isArray(data.categories)) {
+            const existingIds = new Set(categories.map(c => c.id));
+            const newCats = data.categories
+                .filter((c: Category) => c.isCustom && !existingIds.has(c.id));
+            if (newCats.length > 0) {
+                saveCategories([...categories, ...newCats]);
+                importedCategories = newCats.length;
+            }
+        }
+
+        return { expenses: importedExpenses, categories: importedCategories };
+    };
+
     const filteredExpenses = useMemo(() => {
         const now = new Date();
         // now.setHours(23, 59, 59, 999); // Removed as it's not needed for general filter logic
@@ -212,7 +241,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
             deleteExpense, addCategory, deleteCategory, filteredExpenses,
             homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
-            exportSettings, setExportSettings
+            importData, exportSettings, setExportSettings
         }}>
             {children}
         </ExpenseContext.Provider>

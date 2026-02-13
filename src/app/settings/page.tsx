@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Download, FileJson, FileSpreadsheet, Bell, BellOff, Clock, Sun, Moon, Monitor } from "lucide-react";
+import { ArrowLeft, Download, Upload, FileJson, FileSpreadsheet, Bell, BellOff, Clock, Sun, Moon, Monitor, Check } from "lucide-react";
 import { useExpenses, ExportFrequency } from "@/contexts/ExpenseContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { M3Card } from "@/components/m3-ui";
@@ -11,8 +11,10 @@ type ThemeOption = { label: string; value: "system" | "light" | "dark"; icon: an
 
 export default function Settings() {
     const router = useRouter();
-    const { exportData, exportSettings, setExportSettings } = useExpenses();
+    const { exportData, importData, exportSettings, setExportSettings } = useExpenses();
     const { theme, setTheme } = useTheme();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [importResult, setImportResult] = useState<string | null>(null);
 
     const themes: ThemeOption[] = [
         { label: "System", value: "system", icon: Monitor },
@@ -26,6 +28,21 @@ export default function Settings() {
         { label: "Weekly", value: "weekly", icon: Clock },
         { label: "Monthly", value: "monthly", icon: Clock },
     ];
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            const result = await importData(file);
+            setImportResult(`Imported ${result.expenses} expenses, ${result.categories} categories`);
+            setTimeout(() => setImportResult(null), 4000);
+        } catch {
+            setImportResult("Import failed — invalid file format");
+            setTimeout(() => setImportResult(null), 4000);
+        }
+        // Reset the input so the same file can be re-selected
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
@@ -98,7 +115,7 @@ export default function Settings() {
                 {/* Manual Export Section */}
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
-                        Manual Export
+                        Export
                     </h2>
                     <div className="space-y-3">
                         <M3Card
@@ -129,6 +146,38 @@ export default function Settings() {
                             <Download size={18} className="text-on-surface-variant opacity-30 shrink-0" />
                         </M3Card>
                     </div>
+                </section>
+
+                {/* Import Section */}
+                <section>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
+                        Import
+                    </h2>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        onChange={handleImport}
+                        className="hidden"
+                    />
+                    <M3Card
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-4 p-4 hover:bg-surface-container-high cursor-pointer active:scale-[0.98] transition-all"
+                    >
+                        <div className="w-11 h-11 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+                            <Upload size={22} />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-bold text-sm">Import from JSON</p>
+                            <p className="text-[11px] text-on-surface-variant">Restore a previous backup</p>
+                        </div>
+                    </M3Card>
+                    {importResult && (
+                        <div className="mt-3 flex items-center gap-2 text-sm font-medium text-primary px-2 animate-in fade-in">
+                            <Check size={16} />
+                            <span>{importResult}</span>
+                        </div>
+                    )}
                 </section>
 
                 <div className="pt-6 opacity-30 text-center">

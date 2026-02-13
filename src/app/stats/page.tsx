@@ -1,194 +1,266 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, PieChart as PieIcon, TrendingUp, Calendar, ChevronDown } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { ArrowLeft, ChevronLeft, ChevronRight, TrendingUp, PieChart as PieIcon } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 import { useExpenses } from "@/contexts/ExpenseContext";
-import { M3Card, M3Chip } from "@/components/m3-ui";
+import { M3Card } from "@/components/m3-ui";
+import { cn } from "@/lib/utils";
+
+const CHART_COLORS = [
+    "#7C4DFF", "#FF6D00", "#00BFA5", "#F50057",
+    "#6200EA", "#FFD600", "#00B0FF", "#C51162",
+    "#AA00FF", "#64DD17", "#DD2C00", "#304FFE",
+];
 
 export default function Stats() {
     const router = useRouter();
-    const { filteredExpenses, expenses, categories, filterPeriod, setFilterPeriod, customRange, setCustomRange } = useExpenses();
-    const [showRangePicker, setShowRangePicker] = useState(false);
+    const { expenses, categories } = useExpenses();
 
+    // Month navigator state
+    const [monthOffset, setMonthOffset] = useState(0);
+    const [selectedDay, setSelectedDay] = useState<number | null>(null);
+    const dateStripRef = useRef<HTMLDivElement>(null);
+
+    const selectedMonth = useMemo(() => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - monthOffset);
+        return d;
+    }, [monthOffset]);
+
+    // Reset selected day when month changes
+    useEffect(() => { setSelectedDay(null); }, [monthOffset]);
+
+    const monthLabel = selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+    // Days in the selected month
+    const daysInMonth = useMemo(() => {
+        const y = selectedMonth.getFullYear();
+        const m = selectedMonth.getMonth();
+        const count = new Date(y, m + 1, 0).getDate();
+        const today = new Date();
+        return Array.from({ length: count }, (_, i) => {
+            const d = new Date(y, m, i + 1);
+            return {
+                day: i + 1,
+                weekday: d.toLocaleDateString(undefined, { weekday: 'narrow' }),
+                isToday: d.toDateString() === today.toDateString(),
+            };
+        });
+    }, [selectedMonth]);
+
+    // Filter expenses for the selected month (and optionally day)
+    const monthExpenses = useMemo(() => {
+        const m = selectedMonth.getMonth();
+        const y = selectedMonth.getFullYear();
+        return expenses.filter(e => {
+            const d = new Date(e.date);
+            if (d.getMonth() !== m || d.getFullYear() !== y) return false;
+            if (selectedDay !== null && d.getDate() !== selectedDay) return false;
+            return true;
+        });
+    }, [expenses, selectedMonth, selectedDay]);
+
+    const monthTotal = useMemo(() => monthExpenses.reduce((s, e) => s + e.amount, 0), [monthExpenses]);
+
+    // Category breakdown
     const chartData = useMemo(() => {
-        const data: Record<string, { name: string; value: number; color: string }> = {};
-        const colors = [
-            'rgb(var(--m3-primary))',
-            'rgb(var(--m3-secondary))',
-            'rgb(var(--m3-tertiary))',
-            'rgb(var(--m3-on-primary-container))',
-            'rgb(var(--m3-on-secondary-container))',
-            'rgb(var(--m3-on-tertiary-container))'
-        ];
-
-        filteredExpenses.forEach((exp) => {
+        const map: Record<string, { name: string; emoji: string; value: number }> = {};
+        monthExpenses.forEach(exp => {
             const cat = categories.find(c => c.id === exp.categoryId);
             const name = cat?.name || 'Other';
-            if (!data[name]) {
-                data[name] = { name, value: 0, color: colors[Object.keys(data).length % colors.length] };
-            }
-            data[name].value += exp.amount;
+            const emoji = cat?.emoji || '💰';
+            if (!map[name]) map[name] = { name, emoji, value: 0 };
+            map[name].value += exp.amount;
         });
+        return Object.values(map).sort((a, b) => b.value - a.value);
+    }, [monthExpenses, categories]);
 
-        return Object.values(data).sort((a, b) => b.value - a.value);
-    }, [filteredExpenses, categories]);
-
+    // Month-on-month trend (last 6 months from selected)
     const momData = useMemo(() => {
-        const data: Record<string, { month: string; amount: number; sortKey: string }> = {};
-        expenses.forEach(exp => {
-            const date = new Date(exp.date);
-            const monthLabel = date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
-            const sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-            if (!data[sortKey]) data[sortKey] = { month: monthLabel, amount: 0, sortKey };
-            data[sortKey].amount += exp.amount;
-        });
-
-        return Object.values(data)
-            .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
-            .slice(-6); // Last 6 months
-    }, [expenses]);
+        const months: { month: string; amount: number; sortKey: string }[] = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(selectedMonth);
+            d.setMonth(d.getMonth() - i);
+            const m = d.getMonth();
+            const y = d.getFullYear();
+            const total = expenses
+                .filter(e => {
+                    const ed = new Date(e.date);
+                    return ed.getMonth() === m && ed.getFullYear() === y;
+                })
+                .reduce((s, e) => s + e.amount, 0);
+            months.push({
+                month: d.toLocaleDateString(undefined, { month: 'short' }),
+                amount: total,
+                sortKey: `${y}-${String(m + 1).padStart(2, '0')}`,
+            });
+        }
+        return months;
+    }, [expenses, selectedMonth]);
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
-            <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-10">
-                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full">
+            {/* Header */}
+            <header className="px-6 pt-14 pb-2 flex items-center gap-4 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-xl font-medium">Analytics</h1>
-                <div className="w-10" />
+                <h1 className="text-xl font-bold">Statistics</h1>
             </header>
 
-            <div className="px-6 space-y-6">
-                {/* Period Selectors */}
-                <div className="space-y-4">
-                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        {['monthly', '7', '30', 'custom'].map((p) => (
-                            <M3Chip
-                                key={p}
-                                label={p === 'monthly' ? 'Current Month' : p === 'custom' ? 'Custom Range' : `${p} Days`}
-                                active={filterPeriod === p}
-                                onClick={() => {
-                                    setFilterPeriod(p as any);
-                                    if (p === 'custom') setShowRangePicker(true);
-                                    else setShowRangePicker(false);
-                                }}
-                            />
-                        ))}
-                    </div>
-
-                    {(showRangePicker || filterPeriod === 'custom') && (
-                        <M3Card className="p-4 flex flex-col gap-4 animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Select Range</h3>
-                                <Calendar size={18} className="text-primary" />
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] font-bold text-on-surface-variant uppercase">From</span>
-                                    <input
-                                        type="date"
-                                        value={customRange?.start || ''}
-                                        onChange={(e) => setCustomRange({ start: e.target.value, end: customRange?.end || e.target.value })}
-                                        className="w-full bg-surface-container-high rounded-xl p-3 text-sm outline-none"
-                                    />
-                                </div>
-                                <div className="flex-1 space-y-1">
-                                    <span className="text-[10px] font-bold text-on-surface-variant uppercase">To</span>
-                                    <input
-                                        type="date"
-                                        value={customRange?.end || ''}
-                                        onChange={(e) => setCustomRange({ start: customRange?.start || e.target.value, end: e.target.value })}
-                                        className="w-full bg-surface-container-high rounded-xl p-3 text-sm outline-none"
-                                    />
-                                </div>
-                            </div>
-                        </M3Card>
-                    )}
+            {/* Month Navigator — Meow style */}
+            <div className="flex items-center justify-between px-6 py-4">
+                <button
+                    onClick={() => setMonthOffset(p => p + 1)}
+                    className="p-2 rounded-full hover:bg-surface-container-high active:scale-90 transition-all"
+                >
+                    <ChevronLeft size={22} />
+                </button>
+                <div className="text-center">
+                    <p className="text-sm font-bold uppercase tracking-wider">{monthLabel}</p>
+                    <p className="text-3xl font-extrabold mt-1 tabular-nums">{monthTotal.toFixed(2)}</p>
                 </div>
+                <button
+                    onClick={() => setMonthOffset(p => Math.max(0, p - 1))}
+                    className="p-2 rounded-full hover:bg-surface-container-high active:scale-90 transition-all"
+                    disabled={monthOffset === 0}
+                >
+                    <ChevronRight size={22} className={monthOffset === 0 ? 'opacity-20' : ''} />
+                </button>
+            </div>
 
+            {/* Date Strip — Meow style */}
+            <div className="px-4 pb-4">
+                <div ref={dateStripRef} className="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
+                    {daysInMonth.map(({ day, weekday, isToday }) => (
+                        <button
+                            key={day}
+                            onClick={() => setSelectedDay(prev => prev === day ? null : day)}
+                            className={cn(
+                                "flex flex-col items-center min-w-[40px] py-2 px-1 rounded-xl transition-all text-center shrink-0",
+                                selectedDay === day
+                                    ? "bg-primary text-on-primary scale-105"
+                                    : isToday
+                                        ? "bg-secondary-container text-on-secondary-container"
+                                        : "hover:bg-surface-container-high text-on-surface"
+                            )}
+                        >
+                            <span className="text-[9px] font-bold uppercase leading-none">{weekday}</span>
+                            <span className="text-sm font-bold mt-0.5 tabular-nums">{day}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="px-6 space-y-6">
                 {chartData.length === 0 ? (
                     <M3Card className="py-20 flex flex-col items-center justify-center opacity-40">
                         <PieIcon size={48} strokeWidth={1} className="mb-4" />
-                        <p>No data for this period</p>
+                        <p className="font-medium">No expenses this month</p>
                     </M3Card>
                 ) : (
                     <>
-                        {/* Breakdown Chart */}
+                        {/* Donut Chart with total in center */}
                         <M3Card className="p-6">
-                            <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-6">
-                                Category Breakdown
-                            </h2>
-                            <div className="h-64">
+                            <div className="relative h-56">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
                                             data={chartData}
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            paddingAngle={5}
+                                            innerRadius="60%"
+                                            outerRadius="85%"
+                                            paddingAngle={3}
                                             dataKey="value"
+                                            stroke="none"
                                         >
-                                            {chartData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                            {chartData.map((_, i) => (
+                                                <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                                             ))}
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{
                                                 backgroundColor: 'rgb(var(--m3-surface-container-high))',
                                                 border: 'none',
-                                                borderRadius: '16px',
-                                                color: 'rgb(var(--m3-on-surface))'
+                                                borderRadius: '12px',
+                                                color: 'rgb(var(--m3-on-surface))',
+                                                fontSize: '13px',
                                             }}
                                             formatter={(value: number) => [value.toFixed(2), '']}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
-                            </div>
-                            <div className="space-y-4 mt-8">
-                                {chartData.map((item) => (
-                                    <div key={item.name} className="flex items-center gap-4 py-1">
-                                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }}></div>
-                                        <span className="text-sm font-medium flex-1">{item.name}</span>
-                                        <span className="text-sm font-bold tracking-tight">{item.value.toFixed(2)}</span>
-                                    </div>
-                                ))}
+                                {/* Center label */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Total</span>
+                                    <span className="text-xl font-extrabold tabular-nums">{monthTotal.toFixed(2)}</span>
+                                </div>
                             </div>
                         </M3Card>
 
-                        {/* Month on Month Trend */}
-                        <M3Card className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-                                    Month on Month
-                                </h2>
-                                <TrendingUp size={18} className="text-primary" />
+                        {/* Category Breakdown List */}
+                        <section>
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3 px-1">Breakdown</h2>
+                            <div className="flex flex-col gap-2">
+                                {chartData.map((item, i) => {
+                                    const pct = monthTotal > 0 ? (item.value / monthTotal) * 100 : 0;
+                                    return (
+                                        <M3Card key={item.name} className="p-4">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div
+                                                    className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
+                                                    style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] + '22' }}
+                                                >
+                                                    {item.emoji}
+                                                </div>
+                                                <span className="font-semibold text-sm flex-1 truncate">{item.name}</span>
+                                                <span className="text-xs font-bold text-on-surface-variant">{pct.toFixed(0)}%</span>
+                                                <span className="font-bold text-sm tabular-nums">{item.value.toFixed(2)}</span>
+                                            </div>
+                                            {/* Percentage bar */}
+                                            <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-500"
+                                                    style={{
+                                                        width: `${pct}%`,
+                                                        backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+                                                    }}
+                                                />
+                                            </div>
+                                        </M3Card>
+                                    );
+                                })}
                             </div>
-                            <div className="h-64">
+                        </section>
+
+                        {/* Month-on-Month Trend */}
+                        <M3Card className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">6-Month Trend</h2>
+                                <TrendingUp size={16} className="text-primary" />
+                            </div>
+                            <div className="h-44">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={momData}>
-                                        <XAxis dataKey="month" hide />
-                                        <YAxis hide />
+                                    <BarChart data={momData} barCategoryGap="25%">
+                                        <XAxis
+                                            dataKey="month"
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fontSize: 11, fontWeight: 700, fill: 'rgb(var(--m3-on-surface-variant))' }}
+                                        />
                                         <Tooltip
-                                            cursor={{ fill: 'rgba(var(--m3-primary), 0.05)' }}
+                                            cursor={{ fill: 'rgba(var(--m3-primary), 0.06)' }}
                                             contentStyle={{
                                                 backgroundColor: 'rgb(var(--m3-surface-container-high))',
                                                 border: 'none',
-                                                borderRadius: '12px'
+                                                borderRadius: '12px',
+                                                fontSize: '13px',
                                             }}
-                                            formatter={(value: number) => [value.toFixed(2), 'Spending']}
+                                            formatter={(value: number) => [value.toFixed(2), 'Spent']}
                                         />
-                                        <Bar dataKey="amount" fill="rgb(var(--m3-primary))" radius={[12, 12, 0, 0]} />
+                                        <Bar dataKey="amount" fill="rgb(var(--m3-primary))" radius={[8, 8, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
-                            </div>
-                            <div className="flex justify-between mt-4 px-2">
-                                {momData.map(d => (
-                                    <span key={d.sortKey} className="text-[10px] font-bold text-on-surface-variant">
-                                        {d.month}
-                                    </span>
-                                ))}
                             </div>
                         </M3Card>
                     </>
