@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'export',
-    /* config options here */
+  output: 'export',
+  basePath: '/my-project',
+  assetPrefix: '/my-project/',
 };
 
 export default nextConfig;
