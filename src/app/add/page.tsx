@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Trash2, ChevronRight, LayoutGrid } from "lucide-react";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import { useExpenses } from "@/contexts/ExpenseContext";
 import { M3Card, M3Button } from "@/components/m3-ui";
 import { cn } from "@/lib/utils";
 
-export default function AddExpense() {
+function AddExpenseContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const editId = searchParams.get("edit");
@@ -88,7 +88,7 @@ export default function AddExpense() {
                     />
                 </div>
 
-                {/* Category Selection */}
+                {/* Category Selection — Meow-style compact icon grid */}
                 <section>
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Category</h2>
@@ -97,27 +97,27 @@ export default function AddExpense() {
                             <span>Manage</span>
                         </Link>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                         {categories.map((cat) => (
                             <div
                                 key={cat.id}
                                 onClick={() => setCategoryId(cat.id)}
                                 className={cn(
-                                    "p-4 rounded-3xl flex items-center gap-3 transition-all cursor-pointer border-2",
+                                    "flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all cursor-pointer",
                                     categoryId === cat.id
-                                        ? "bg-secondary-container border-secondary text-on-secondary-container scale-[1.02] shadow-md"
-                                        : "bg-surface-container border-transparent hover:bg-surface-container-high text-on-surface"
+                                        ? "bg-secondary-container text-on-secondary-container scale-105 shadow-md ring-2 ring-secondary"
+                                        : "bg-surface-container hover:bg-surface-container-high text-on-surface"
                                 )}
                             >
-                                <span className="text-2xl">{cat.emoji}</span>
-                                <span className="font-semibold text-sm truncate">{cat.name}</span>
+                                <span className="text-3xl">{cat.emoji}</span>
+                                <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* Other Details */}
-                <M3Card className="p-4 space-y-4">
+                {/* Description & Date */}
+                <div className="space-y-4">
                     <div className="space-y-1">
                         <span className="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Description</span>
                         <input
@@ -125,7 +125,7 @@ export default function AddExpense() {
                             placeholder="Lunch with friends..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full bg-surface-container-high rounded-xl p-3 outline-none"
+                            className="w-full bg-surface-container rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary transition-all"
                         />
                     </div>
                     <div className="space-y-1">
@@ -134,15 +134,23 @@ export default function AddExpense() {
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full bg-surface-container-high rounded-xl p-3 outline-none"
+                            className="w-full bg-surface-container rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary transition-all"
                         />
                     </div>
-                </M3Card>
+                </div>
 
-                <M3Button className="w-full py-4 text-lg mt-8 shadow-lg">
-                    {editId ? "Update Transaction" : "Save Transaction"}
+                <M3Button className="w-full py-4 text-lg shadow-lg">
+                    {editId ? "Update" : "Save"}
                 </M3Button>
             </form>
         </main>
+    );
+}
+
+export default function AddExpense() {
+    return (
+        <Suspense>
+            <AddExpenseContent />
+        </Suspense>
     );
 }
