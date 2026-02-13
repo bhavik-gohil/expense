@@ -33,20 +33,29 @@ export default function Stats() {
 
     const monthLabel = selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
-    // Days in the selected month
-    const daysInMonth = useMemo(() => {
+    // Days in the selected month with padding for grid alignment
+    const calendarData = useMemo(() => {
         const y = selectedMonth.getFullYear();
         const m = selectedMonth.getMonth();
-        const count = new Date(y, m + 1, 0).getDate();
+        const firstDay = new Date(y, m, 1).getDay(); // 0 = Sun, 1 = Mon...
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
         const today = new Date();
-        return Array.from({ length: count }, (_, i) => {
-            const d = new Date(y, m, i + 1);
-            return {
-                day: i + 1,
-                weekday: d.toLocaleDateString(undefined, { weekday: 'narrow' }),
-                isToday: d.toDateString() === today.toDateString(),
-            };
-        });
+
+        const days = [];
+        // Add empty slots for days before the 1st
+        for (let i = 0; i < firstDay; i++) {
+            days.push({ day: null, fullDate: null, isToday: false });
+        }
+        // Add actual days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const d = new Date(y, m, i);
+            days.push({
+                day: i,
+                fullDate: d,
+                isToday: d.toDateString() === today.toDateString()
+            });
+        }
+        return days;
     }, [selectedMonth]);
 
     // Filter expenses for the selected month (and optionally day)
@@ -99,8 +108,10 @@ export default function Stats() {
         return months;
     }, [expenses, selectedMonth]);
 
+
+
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12 max-w-[100vw] overflow-x-hidden">
             {/* Header */}
             <header className="px-6 pt-14 pb-2 flex items-center gap-4 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
@@ -130,26 +141,43 @@ export default function Stats() {
                 </button>
             </div>
 
-            {/* Date Strip — Meow style */}
-            <div className="px-4 pb-4">
-                <div ref={dateStripRef} className="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
-                    {daysInMonth.map(({ day, weekday, isToday }) => (
-                        <button
-                            key={day}
-                            onClick={() => setSelectedDay(prev => prev === day ? null : day)}
-                            className={cn(
-                                "flex flex-col items-center min-w-[40px] py-2 px-1 rounded-xl transition-all text-center shrink-0",
-                                selectedDay === day
-                                    ? "bg-primary text-on-primary scale-105"
-                                    : isToday
-                                        ? "bg-secondary-container text-on-secondary-container"
-                                        : "hover:bg-surface-container-high text-on-surface"
-                            )}
-                        >
-                            <span className="text-[9px] font-bold uppercase leading-none">{weekday}</span>
-                            <span className="text-sm font-bold mt-0.5 tabular-nums">{day}</span>
-                        </button>
+            {/* Calendar Grid — Meow style */}
+            <div className="px-6 pb-6 w-full">
+                {/* Weekday Headers */}
+                <div className="grid grid-cols-7 mb-2 text-center">
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
+                        <span key={d} className="text-[10px] font-bold text-on-surface-variant opacity-50">
+                            {d}
+                        </span>
                     ))}
+                </div>
+                {/* Days Grid */}
+                <div className="grid grid-cols-7 gap-y-2 gap-x-1">
+                    {calendarData.map((item, index) => {
+                        if (!item.day) return <div key={`empty-${index}`} />;
+
+                        const isSelected = selectedDay === item.day;
+
+                        return (
+                            <button
+                                key={item.day}
+                                onClick={() => setSelectedDay(prev => prev === item.day ? null : item.day)}
+                                className={cn(
+                                    "flex items-center justify-center h-10 rounded-xl transition-all relative text-sm font-medium",
+                                    isSelected
+                                        ? "bg-primary text-on-primary font-bold shadow-md scale-105 z-10"
+                                        : item.isToday
+                                            ? "bg-secondary-container text-on-secondary-container font-bold"
+                                            : "hover:bg-surface-container-high text-on-surface"
+                                )}
+                            >
+                                {item.day}
+                                {isSelected && (
+                                    <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-on-primary" />
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
