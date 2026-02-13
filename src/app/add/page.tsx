@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Save, Trash2, Calendar } from "lucide-react";
+import { ArrowLeft, Trash2, ChevronRight, LayoutGrid } from "lucide-react";
+import Link from "next/link";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { M3Card, M3Button } from "@/components/m3-ui";
+import { cn } from "@/lib/utils";
 
 export default function AddExpense() {
     const router = useRouter();
@@ -14,11 +16,11 @@ export default function AddExpense() {
     const [amount, setAmount] = useState("");
     const [categoryId, setCategoryId] = useState("");
     const [description, setDescription] = useState("");
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
     useEffect(() => {
         if (editId) {
-            const expense = expenses.find(e => e.id === editId);
+            const expense = expenses.find((e) => e.id === editId);
             if (expense) {
                 setAmount(expense.amount.toString());
                 setCategoryId(expense.categoryId);
@@ -62,83 +64,51 @@ export default function AddExpense() {
                 </button>
                 <h1 className="text-xl font-medium">{editId ? "Edit Expense" : "New Expense"}</h1>
                 {editId ? (
-                    <button onClick={handleDelete} className="p-2 -mx-2 hover:bg-error-container text-error rounded-full">
+                    <button onClick={handleDelete} className="p-2 text-error hover:bg-error/10 rounded-full">
                         <Trash2 size={24} />
                     </button>
-                ) : <div className="w-10" />}
+                ) : (
+                    <div className="w-10" />
+                )}
             </header>
 
-            <form onSubmit={handleSubmit} className="px-6 space-y-6">
-                {/* Amount field */}
-                <div className="flex flex-col items-center justify-center py-8">
-                    <div className="text-sm font-medium text-on-surface-variant mb-2">Amount</div>
-                    <div className="flex items-baseline text-6xl font-bold tracking-tight">
-                        <span className="text-on-surface-variant mr-1 text-4xl">$</span>
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            className="bg-transparent border-none outline-none w-48 text-center no-spinner"
-                            placeholder="0.00"
-                            autoFocus
-                            required
-                        />
-                    </div>
+            <form onSubmit={handleSubmit} className="px-6 space-y-8">
+                {/* Amount Input */}
+                <div className="text-center py-8">
+                    <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Amount</span>
+                    <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        autoFocus
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="w-full text-center text-6xl font-bold bg-transparent outline-none placeholder:opacity-20"
+                        required
+                    />
                 </div>
 
-                {/* Details Card */}
-                <M3Card className="space-y-4 p-4">
-                    <div className="flex items-center gap-4">
-                        <Calendar size={20} className="text-on-surface-variant" />
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="bg-transparent border-none outline-none flex-1 text-on-surface"
-                            required
-                        />
+                {/* Category Selection */}
+                <section>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Category</h2>
+                        <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1">
+                            <LayoutGrid size={16} />
+                            <span>Manage</span>
+                        </Link>
                     </div>
-                    <div className="h-px bg-outline opacity-20" />
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Add a description (optional)"
-                        className="bg-transparent border-none outline-none w-full resize-none py-2"
-                        rows={2}
-                    />
-                </M3Card>
-
-                {/* Categories */}
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant px-2">
-                            Category
-                        </h2>
-                        <button
-                            type="button"
-                            onClick={() => router.push("/types")}
-                            className="text-xs font-medium text-primary px-2"
-                        >
-                            Manage
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                         {categories.map((cat) => (
-                            <button
+                            <div
                                 key={cat.id}
-                                type="button"
                                 onClick={() => setCategoryId(cat.id)}
-                                className={`flex flex-col items-center gap-2 p-2 rounded-2xl transition-all ${categoryId === cat.id
-                                        ? "bg-secondary-container text-on-secondary-container scale-105"
-                                        : "bg-surface-container hover:bg-surface-container-high text-on-surface"
-                                    }`}
+                                className={cn(
+                                    "p-4 rounded-3xl flex items-center gap-3 transition-all cursor-pointer border-2",
+                                    categoryId === cat.id
+                                        ? "bg-secondary-container border-secondary text-on-secondary-container scale-[1.02] shadow-md"
+                                        : "bg-surface-container border-transparent hover:bg-surface-container-high text-on-surface"
+                                )}
                             >
-                                <div className="text-2xl">{cat.emoji}</div>
-                                <span className="text-[10px] font-medium truncate w-full text-center">
-                                    {cat.name}
-                                </span>
                             </button>
                         ))}
                     </div>
