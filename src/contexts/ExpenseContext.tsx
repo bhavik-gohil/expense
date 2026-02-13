@@ -41,6 +41,7 @@ interface ExpenseContextType {
     homeExpenses: Expense[]; // Last 3 months for Home Page
     totalForPeriod: number;
     homeTotal: number;
+    currentMonthTotal: number;
     exportData: (format: 'json' | 'csv') => void;
     exportSettings: ExportSettings;
     setExportSettings: (settings: ExportSettings) => void;
@@ -195,12 +196,22 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     const totalForPeriod = useMemo(() => filteredExpenses.reduce((sum, e) => sum + e.amount, 0), [filteredExpenses]);
     const homeTotal = useMemo(() => homeExpenses.reduce((sum, e) => sum + e.amount, 0), [homeExpenses]);
 
+    const currentMonthExpenses = useMemo(() => {
+        const now = new Date();
+        return expenses.filter(e => {
+            const date = new Date(e.date);
+            return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+        });
+    }, [expenses]);
+
+    const currentMonthTotal = useMemo(() => currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
+
     return (
         <ExpenseContext.Provider value={{
             expenses, categories, filterPeriod, customRange,
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
             deleteExpense, addCategory, deleteCategory, filteredExpenses,
-            homeExpenses, totalForPeriod, homeTotal, exportData,
+            homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
             exportSettings, setExportSettings
         }}>
             {children}

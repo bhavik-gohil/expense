@@ -6,7 +6,7 @@ import { useExpenses } from "@/contexts/ExpenseContext";
 import { M3Card, FAB } from "@/components/m3-ui";
 
 export default function Home() {
-  const { homeExpenses, homeTotal, categories } = useExpenses();
+  const { homeExpenses, currentMonthTotal, categories } = useExpenses();
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, typeof homeExpenses> = {};
@@ -28,8 +28,8 @@ export default function Home() {
       <header className="px-6 pt-12 pb-6 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-sm font-medium text-on-surface-variant">Last 3 Months</h1>
-            <p className="text-4xl font-bold tracking-tight">{homeTotal.toFixed(2)}</p>
+            <h1 className="text-sm font-medium text-on-surface-variant">Current Month</h1>
+            <p className="text-4xl font-bold tracking-tight">{currentMonthTotal.toFixed(2)}</p>
           </div>
           <div className="flex gap-2">
             <Link href="/stats">

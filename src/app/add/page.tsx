@@ -109,17 +109,39 @@ export default function AddExpense() {
                                         : "bg-surface-container border-transparent hover:bg-surface-container-high text-on-surface"
                                 )}
                             >
-                            </button>
+                                <span className="text-2xl">{cat.emoji}</span>
+                                <span className="font-semibold text-sm truncate">{cat.name}</span>
+                            </div>
                         ))}
                     </div>
-                </div>
+                </section>
 
-                <div className="pt-6">
-                    <M3Button className="w-full flex items-center justify-center gap-2" variant="filled">
-                        <Save size={20} />
-                        Save Expense
-                    </M3Button>
-                </div>
+                {/* Other Details */}
+                <M3Card className="p-4 space-y-4">
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Description</span>
+                        <input
+                            type="text"
+                            placeholder="Lunch with friends..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full bg-surface-container-high rounded-xl p-3 outline-none"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Date</span>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full bg-surface-container-high rounded-xl p-3 outline-none"
+                        />
+                    </div>
+                </M3Card>
+
+                <M3Button className="w-full py-4 text-lg mt-8 shadow-lg">
+                    {editId ? "Update Transaction" : "Save Transaction"}
+                </M3Button>
             </form>
         </main>
     );
