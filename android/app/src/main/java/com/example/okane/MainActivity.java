@@ -1,4 +1,4 @@
-package com.example.fin;
+package com.example.okane;
 
 import com.getcapacitor.BridgeActivity;
 

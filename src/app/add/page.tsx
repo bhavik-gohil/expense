@@ -84,7 +84,7 @@ function AddExpenseContent() {
             </header>
 
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
-                <div className="text-center py-6">
+                <div className="text-center py-4">
                     <input
                         type="number"
                         step="0.01"
@@ -96,37 +96,6 @@ function AddExpenseContent() {
                         required
                     />
                 </div>
-
-
-
-                <section>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant px-1">Category</h2>
-                        <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1 px-1">
-                            <LayoutGrid size={16} />
-                            <span>Manage</span>
-                        </Link>
-                    </div>
-                    <div className="grid grid-cols-4 gap-3">
-                        {categories.map((cat) => (
-                            <div
-                                key={cat.id}
-                                onClick={() => setFormData({ ...formData, categoryId: cat.id })}
-                                className={cn(
-                                    "flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all cursor-pointer border-2 border-transparent",
-                                    formData.categoryId === cat.id
-                                        ? "bg-primary/5 border-primary scale-105"
-                                        : "hover:bg-text-main/5"
-                                )}
-                            >
-                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
-                                    {cat.emoji}
-                                </div>
-                                <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </section>
 
                 <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
@@ -146,6 +115,34 @@ function AddExpenseContent() {
                         className="w-full bg-surface border border-border-color rounded-2xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 placeholder:text-text-muted/50 text-text-main"
                     />
                 </div>
+
+                <section>
+                    <div className="grid grid-cols-4 gap-3">
+                        {categories.map((cat) => (
+                            <div
+                                key={cat.id}
+                                onClick={() => setFormData({ ...formData, categoryId: cat.id })}
+                                className={cn(
+                                    "flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all cursor-pointer border-2 border-transparent",
+                                    formData.categoryId === cat.id
+                                        ? "bg-primary/5 border-primary scale-105"
+                                        : "hover:bg-text-main/5"
+                                )}
+                            >
+                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
+                                    {cat.emoji}
+                                </div>
+                                <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-center items-center my-6">
+                        <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1 px-1">
+                            <LayoutGrid size={16} />
+                            <span>Manage Categories</span>
+                        </Link>
+                    </div>
+                </section>
 
                 <div className="flex gap-3">
                     <GlassButton type="submit" className="flex-1 text-base">

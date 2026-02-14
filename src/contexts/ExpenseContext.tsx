@@ -13,7 +13,7 @@ export interface Expense {
     amount: number;
     categoryId: string;
     description: string;
-    date: string; 
+    date: string;
     timestamp: number;
 }
 
@@ -37,8 +37,8 @@ interface ExpenseContextType {
     deleteExpense: (id: string) => void;
     addCategory: (category: Omit<Category, 'id' | 'isCustom'>) => void;
     deleteCategory: (id: string) => void;
-    filteredExpenses: Expense[]; 
-    homeExpenses: Expense[]; 
+    filteredExpenses: Expense[];
+    homeExpenses: Expense[];
     totalForPeriod: number;
     homeTotal: number;
     currentMonthTotal: number;
@@ -144,9 +144,10 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const exportData = (format: 'json' | 'csv') => {
+    const exportData = async (format: 'json' | 'csv') => {
         let content = '';
-        const filename = `expense-tracker-export-${new Date().toISOString().split('T')[0]}`;
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filename = `okane-export-${dateStr}.${format}`;
 
         if (format === 'json') {
             content = JSON.stringify({ expenses, categories }, null, 2);
@@ -159,43 +160,93 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             content = [headers.join(','), ...rows].join('\n');
         }
 
-        const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}.${format}`;
-        a.click();
-        URL.revokeObjectURL(url);
+        // Handle Native Platform (Android/iOS)
+        if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
+            try {
+                const { Filesystem, Directory } = await import('@capacitor/filesystem');
+                const { Share } = await import('@capacitor/share');
+
+                // 1. Attempt to write to public Download folder (Android only)
+                // If it fails (due to permissions), we fall back to Cache + Share
+                try {
+                    await Filesystem.writeFile({
+                        path: `Download/${filename}`,
+                        data: content,
+                        directory: Directory.ExternalStorage,
+                        encoding: (await import('@capacitor/filesystem')).Encoding.UTF8,
+                    });
+                    alert(`Saved to Downloads folder: ${filename}`);
+                } catch (saveErr) {
+                    console.log('Direct download failed, falling back to Share sheet', saveErr);
+                    // 2. Fallback: Write file to Cache and Share
+                    const result = await Filesystem.writeFile({
+                        path: filename,
+                        data: content,
+                        directory: Directory.Cache,
+                        encoding: (await import('@capacitor/filesystem')).Encoding.UTF8,
+                    });
+
+                    await Share.share({
+                        title: `Export ${format.toUpperCase()}`,
+                        url: result.uri,
+                        dialogTitle: 'Save or Share Export',
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to export natively', err);
+            }
+        } else {
+            // Handle Web Platform
+            const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
         setExportSettings({ ...exportSettings, lastExport: Date.now() });
     };
 
     const importData = async (file: File): Promise<{ expenses: number; categories: number }> => {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        let importedExpenses = 0;
-        let importedCategories = 0;
-
-        if (data.expenses && Array.isArray(data.expenses)) {
-            const existingIds = new Set(expenses.map(e => e.id));
-            const newExpenses = data.expenses.filter((e: Expense) => !existingIds.has(e.id));
-            if (newExpenses.length > 0) {
-                saveExpenses([...newExpenses, ...expenses]);
-                importedExpenses = newExpenses.length;
+        try {
+            const text = await file.text();
+            let data: any;
+            try {
+                data = JSON.parse(text);
+            } catch (pErr) {
+                console.error('Invalid JSON file', pErr);
+                throw new Error('The selected file is not a valid JSON backup.');
             }
-        }
 
-        if (data.categories && Array.isArray(data.categories)) {
-            const existingIds = new Set(categories.map(c => c.id));
-            const newCats = data.categories
-                .filter((c: Category) => c.isCustom && !existingIds.has(c.id));
-            if (newCats.length > 0) {
-                saveCategories([...categories, ...newCats]);
-                importedCategories = newCats.length;
+            let importedExpenses = 0;
+            let importedCategories = 0;
+
+            if (data.expenses && Array.isArray(data.expenses)) {
+                const existingIds = new Set(expenses.map(e => e.id));
+                const newExpenses = data.expenses.filter((e: Expense) => !existingIds.has(e.id));
+                if (newExpenses.length > 0) {
+                    saveExpenses([...newExpenses, ...expenses]);
+                    importedExpenses = newExpenses.length;
+                }
             }
-        }
 
-        return { expenses: importedExpenses, categories: importedCategories };
+            if (data.categories && Array.isArray(data.categories)) {
+                const existingIds = new Set(categories.map(c => c.id));
+                const newCats = data.categories
+                    .filter((c: Category) => c.isCustom && !existingIds.has(c.id));
+                if (newCats.length > 0) {
+                    saveCategories([...categories, ...newCats]);
+                    importedCategories = newCats.length;
+                }
+            }
+
+            return { expenses: importedExpenses, categories: importedCategories };
+        } catch (err: any) {
+            console.error('Failed to import data', err);
+            throw err;
+        }
     };
 
     const filteredExpenses = useMemo(() => {

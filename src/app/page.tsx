@@ -42,8 +42,8 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
             <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-600 mb-1">Okane</p>
+          <div className="flex flex-col items-end">
+            <p className="text-xs font-semibold tracking-wider text-green-600 mb-1 pr-1">Okane</p>
             <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
               💵
             </div>
