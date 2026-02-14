@@ -1,10 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, X, Smile } from "lucide-react";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard, GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
+
+const DEFAULT_QUICK_PICK = ["🍔", "🛒", "🚗", "🏠", "💡", "🛡️", "💊", "🎮", "🎁", "✈️"];
+const QUICK_PICK_KEY = "m3_quick_pick_emojis";
 
 export default function ManageTypes() {
     const router = useRouter();
@@ -13,11 +16,35 @@ export default function ManageTypes() {
     const [emoji, setEmoji] = useState("💰");
     const [isAdding, setIsAdding] = useState(false);
     const [customEmoji, setCustomEmoji] = useState("");
+    const [quickPickEmojis, setQuickPickEmojis] = useState<string[]>(DEFAULT_QUICK_PICK);
+
+    useEffect(() => {
+        const stored = localStorage.getItem(QUICK_PICK_KEY);
+        if (stored) {
+            try {
+                setQuickPickEmojis(JSON.parse(stored));
+            } catch (e) {
+                console.error("Failed to parse stored quick pick emojis", e);
+            }
+        }
+    }, []);
+
+    const saveQuickPick = (newList: string[]) => {
+        setQuickPickEmojis(newList);
+        localStorage.setItem(QUICK_PICK_KEY, JSON.stringify(newList));
+    };
+
+    const addToQuickPick = () => {
+        if (!customEmoji || quickPickEmojis.includes(customEmoji)) return;
+        const newList = [customEmoji, ...quickPickEmojis].slice(0, 20); // Keep last 20
+        saveQuickPick(newList);
+    };
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name) return;
-        addCategory({ name, emoji });
+        if (!name.trim()) return;
+        // Correct signature: addCategory({ name, emoji })
+        addCategory({ name: name.trim(), emoji });
         setName("");
         setEmoji("💰");
         setCustomEmoji("");
@@ -37,16 +64,12 @@ export default function ManageTypes() {
         }
     };
 
-    const commonEmojis = [
-        "🍔", "🚗", "🛍️", "💊", "🎬", "🧾",
-        "🏠", "🎁", "✈️", "☕", "🎮", "💪",
-        "🐱", "📱", "👕", "🍕", "🎵", "📚",
-        "💇", "🏋️", "🚿", "🎂", "🍷", "⛽",
-    ];
-
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-            <header className="px-6 pt-14 pb-6 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+            <header
+                className="px-6 pt-14 pb-6 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+            >
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
@@ -73,27 +96,25 @@ export default function ManageTypes() {
                         </div>
 
                         <form onSubmit={handleAdd} className="space-y-5">
-                            {/* Emoji preview */}
                             <div className="flex flex-col items-center gap-3">
-                                <div className="text-5xl p-4 bg-surface-container rounded-3xl w-24 h-24 flex items-center justify-center border border-border-color">
+                                <div className="text-5xl p-4 bg-zinc-100 rounded-3xl w-24 h-24 flex items-center justify-center border border-border-color text-text-main transition-all">
                                     {emoji}
                                 </div>
                             </div>
 
-                            {/* Quick pick emojis */}
                             <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2 block px-1">Quick Pick</span>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {commonEmojis.map(e => (
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3 block px-1">Quick Pick</span>
+                                <div className="grid grid-cols-5 gap-2">
+                                    {quickPickEmojis.map(e => (
                                         <button
                                             key={e}
                                             type="button"
                                             onClick={() => { setEmoji(e); setCustomEmoji(""); }}
                                             className={cn(
-                                                "w-10 h-10 flex items-center justify-center rounded-xl text-xl transition-all active:scale-90",
+                                                "w-12 h-12 flex items-center justify-center rounded-2xl text-xl transition-all active:scale-90 border-2",
                                                 emoji === e && !customEmoji
-                                                    ? "bg-black text-white dark:bg-white dark:text-black scale-105 shadow-sm"
-                                                    : "bg-surface border border-border-color hover:bg-surface-container text-text-main"
+                                                    ? "bg-primary/5 border-primary scale-110 shadow-sm"
+                                                    : "bg-zinc-100 border-transparent text-text-main hover:bg-zinc-200"
                                             )}
                                         >
                                             {e}
@@ -103,22 +124,26 @@ export default function ManageTypes() {
                             </div>
 
                             <div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
                                     <div className="relative flex-1">
                                         <Smile size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                                         <input
                                             type="text"
                                             value={customEmoji}
                                             onChange={(e) => handleCustomEmojiInput(e.target.value)}
-                                            placeholder="Paste or type emoji…"
-                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-lg transition-all text-text-main placeholder:text-text-muted/50"
+                                            placeholder="Add Emoji"
+                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-lg text-text-main placeholder:text-text-muted/50"
                                         />
                                     </div>
-                                    {customEmoji && (
-                                        <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-xl shrink-0 border border-border-color">
-                                            {emoji}
-                                        </div>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={addToQuickPick}
+                                        disabled={!customEmoji || quickPickEmojis.includes(customEmoji)}
+                                        className="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-all disabled:opacity-20"
+                                        title="Add to Quick Pick"
+                                    >
+                                        <Plus size={24} />
+                                    </button>
                                 </div>
                             </div>
 
@@ -127,8 +152,8 @@ export default function ManageTypes() {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="e.g. Groceries"
-                                    className="w-full bg-surface border border-border-color rounded-2xl p-4 outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 transition-all text-text-main placeholder:text-text-muted/50"
+                                    placeholder="Category"
+                                    className="w-full bg-surface border border-border-color rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-text-main placeholder:text-text-muted/50"
                                     required
                                 />
                             </div>
@@ -144,8 +169,10 @@ export default function ManageTypes() {
                     </h2>
                     <div className="space-y-2">
                         {categories.map(cat => (
-                            <div key={cat.id} className="flex items-center gap-4 p-4 bg-surface-container rounded-2xl">
-                                <span className="text-2xl">{cat.emoji}</span>
+                            <div key={cat.id} className="flex items-center gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
+                                    {cat.emoji}
+                                </div>
                                 <span className="flex-1 font-semibold text-sm">{cat.name}</span>
                                 <button
                                     onClick={() => deleteCategory(cat.id)}

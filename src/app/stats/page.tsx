@@ -13,6 +13,8 @@ const CHART_COLORS = [
     "#AA00FF", "#64DD17", "#DD2C00", "#304FFE",
 ];
 
+import { formatDate, formatFullMonth } from "@/lib/date";
+
 export default function Stats() {
     const router = useRouter();
     const { expenses, categories } = useExpenses();
@@ -31,7 +33,7 @@ export default function Stats() {
     // Reset selected day when month changes
     useEffect(() => { setSelectedDay(null); }, [monthOffset]);
 
-    const monthLabel = selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const monthLabel = useMemo(() => formatFullMonth(selectedMonth), [selectedMonth]);
 
     // Days in the selected month with padding for grid alignment
     const calendarData = useMemo(() => {
@@ -39,7 +41,7 @@ export default function Stats() {
         const m = selectedMonth.getMonth();
         const firstDay = new Date(y, m, 1).getDay(); // 0 = Sun, 1 = Mon...
         const daysInMonth = new Date(y, m + 1, 0).getDate();
-        const today = new Date();
+        const todayStr = new Date().toDateString();
 
         const days = [];
         // Add empty slots for days before the 1st
@@ -52,7 +54,7 @@ export default function Stats() {
             days.push({
                 day: i,
                 fullDate: d,
-                isToday: d.toDateString() === today.toDateString()
+                isToday: d.toDateString() === todayStr
             });
         }
         return days;
@@ -100,20 +102,34 @@ export default function Stats() {
                 })
                 .reduce((s, e) => s + e.amount, 0);
             months.push({
-                month: d.toLocaleDateString(undefined, { month: 'short' }),
+                month: formatDate(d, { month: 'short' }),
                 amount: total,
                 sortKey: `${y}-${String(m + 1).padStart(2, '0')}`,
             });
         }
         return months;
-    }, [expenses, selectedMonth]);
-
-
+    }, [expenses, selectedMonth]);    // Custom Tooltip component for 100% solid background
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="!bg-surface border border-border-color rounded-xl p-3 shadow-2xl ring-1 ring-black/10 dark:ring-white/20 opacity-100">
+                    {label && <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1">{label}</p>}
+                    <p className="text-sm font-black text-text-main">
+                        {payload[0].name}: {payload[0].value.toFixed(2)}
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40 max-w-[100vw] overflow-x-hidden">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             {/* Header */}
-            <header className="px-6 pt-14 pb-2 flex items-center gap-4 sticky top-0 bg-transparent backdrop-blur-md z-10">
+            <header
+                className="px-6 pt-14 pb-4 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+            >
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
@@ -190,8 +206,8 @@ export default function Stats() {
                 ) : (
                     <>
                         {/* Donut Chart with total in center */}
-                        <GlassCard className="p-6">
-                            <div className="relative h-56">
+                        <GlassCard className="p-6 overflow-visible">
+                            <div className="relative h-56 overflow-visible">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
@@ -206,20 +222,11 @@ export default function Stats() {
                                                 <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: 'rgb(var(--card-bg))',
-                                                border: '1px solid rgb(var(--border-color))',
-                                                borderRadius: '12px',
-                                                color: 'rgb(var(--text-main))',
-                                                fontSize: '13px',
-                                            }}
-                                            formatter={(value: number) => [value.toFixed(2), '']}
-                                        />
+                                        <Tooltip content={<CustomTooltip />} wrapperStyle={{ zIndex: 100 }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                                 {/* Center label */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Total</span>
                                     <span className="text-xl font-extrabold tabular-nums">{monthTotal.toFixed(2)}</span>
                                 </div>
@@ -236,8 +243,7 @@ export default function Stats() {
                                         <GlassCard key={item.name} className="p-4 flex flex-col gap-3">
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-inner"
-                                                    style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] + '40' }}
+                                                    className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-xl shrink-0"
                                                 >
                                                     {item.emoji}
                                                 </div>
@@ -278,14 +284,8 @@ export default function Stats() {
                                         />
                                         <Tooltip
                                             cursor={{ fill: 'rgba(var(--primary), 0.06)' }}
-                                            contentStyle={{
-                                                backgroundColor: 'rgb(var(--card-bg))',
-                                                border: '1px solid rgb(var(--border-color))',
-                                                borderRadius: '12px',
-                                                color: 'rgb(var(--text-main))',
-                                                fontSize: '13px',
-                                            }}
-                                            formatter={(value: number) => [value.toFixed(2), 'Spent']}
+                                            content={<CustomTooltip />}
+                                            wrapperStyle={{ zIndex: 100 }}
                                         />
                                         <Bar dataKey="amount" fill="rgb(var(--primary))" radius={[8, 8, 0, 0]} />
                                     </BarChart>

@@ -15,8 +15,8 @@ export function BottomNav() {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] pb-2 pt-0 pointer-events-none flex justify-center">
-            <nav className="w-full max-w-2xl bg-surface border-t border-border-color pointer-events-auto flex items-center justify-around pb-6 pt-3 px-2 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
+        <div className="fixed bottom-0 left-0 right-0 z-[100] pt-0 pointer-events-none flex justify-center">
+            <nav className="w-full max-w-2xl bg-surface/80 backdrop-blur-md border-t border-border-color pointer-events-auto flex items-center justify-around pb-6 pt-3 px-2 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -28,13 +28,11 @@ export function BottomNav() {
                                 isActive ? "text-primary" : "text-text-muted hover:text-text-main"
                             )}
                         >
-                            {/* Icon - Clean, no scaling animation to avoid layout shift/blur */}
                             <item.icon
                                 size={26}
                                 strokeWidth={isActive ? 2.5 : 2}
                                 className="mb-0.5"
                             />
-                            {/* Label - Visible only for active? Or simple dot? Let's go simple label for clarity */}
                             <span className={cn("text-[10px] font-medium", isActive ? "font-bold" : "")}>
                                 {item.label}
                             </span>

@@ -4,61 +4,20 @@
 
 @layer base {
   :root {
-    /* High-Performance Minimal Theme */
-    /* Light Mode: Ceramic White */
+    /* High-Performance Minimal Theme (Solid base for blurs) */
     --bg-page: 250, 250, 252;
-    /* #FAFAFC */
     --card-bg: 255, 255, 255;
     --border-color: 228, 228, 231;
-    /* Zinc 200 */
 
     --text-main: 24, 24, 27;
-    /* Zinc 900 */
     --text-muted: 113, 113, 122;
-    /* Zinc 500 */
 
-    /* Action Colors (Solid, High Contrast) */
     --primary: 24, 24, 27;
-    /* Black */
     --on-primary: 255, 255, 255;
 
-    /* Data Accents (Kept vibrant for charts) */
     --accent-blue: 37, 99, 235;
     --accent-purple: 124, 58, 237;
     --accent-pink: 219, 39, 119;
-
-    /* Legacy Mappings */
-    --m3-surface: 250, 250, 252;
-    --m3-on-surface: 24, 24, 27;
-    --m3-surface-variant: 255, 255, 255;
-    --m3-on-surface-variant: 113, 113, 122;
-    --m3-primary: 24, 24, 27;
-  }
-
-  .dark {
-    /* Dark Mode: Matte Slate */
-    --bg-page: 9, 9, 11;
-    /* Zinc 950 */
-    --card-bg: 24, 24, 27;
-    /* Zinc 900 */
-    --border-color: 39, 39, 42;
-    /* Zinc 800 */
-
-    --text-main: 250, 250, 250;
-    /* Zinc 50 */
-    --text-muted: 161, 161, 170;
-    /* Zinc 400 */
-
-    --primary: 250, 250, 250;
-    /* White */
-    --on-primary: 9, 9, 11;
-
-    /* Legacy Mappings */
-    --m3-surface: 9, 9, 11;
-    --m3-on-surface: 250, 250, 250;
-    --m3-surface-variant: 24, 24, 27;
-    --m3-on-surface-variant: 161, 161, 170;
-    --m3-primary: 250, 250, 250;
   }
 }
 
@@ -67,30 +26,19 @@ body {
   color: rgb(var(--text-main));
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* Removed transition to make it feel snappier */
 }
 
 @layer utilities {
-
-  /* Minimal Card Utility - NO BLUR */
   .minimal-card {
     background-color: rgb(var(--card-bg));
     border: 1px solid rgb(var(--border-color));
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
 
-  .dark .minimal-card {
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    /* Slightly stronger shadow in dark mode */
-  }
-
-  /* Focus Ring for Accessibility */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
   }
 }
 
-/* Hide Scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

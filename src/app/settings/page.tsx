@@ -9,18 +9,13 @@ import { cn } from "@/lib/utils";
 
 type ThemeOption = { label: string; value: "system" | "light" | "dark"; icon: any };
 
+import { formatDate } from "@/lib/date";
+
 export default function Settings() {
     const router = useRouter();
     const { exportData, importData, exportSettings, setExportSettings } = useExpenses();
-    const { theme, setTheme } = useTheme();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importResult, setImportResult] = useState<string | null>(null);
-
-    const themes: ThemeOption[] = [
-        { label: "System", value: "system", icon: Monitor },
-        { label: "Light", value: "light", icon: Sun },
-        { label: "Dark", value: "dark", icon: Moon },
-    ];
 
     const frequencies: { label: string; value: ExportFrequency; icon: any }[] = [
         { label: "Off", value: "off", icon: BellOff },
@@ -45,7 +40,10 @@ export default function Settings() {
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-            <header className="px-6 pt-14 pb-6 flex items-center gap-4 sticky top-0 bg-transparent backdrop-blur-md z-10">
+            <header
+                className="px-6 pt-14 pb-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+            >
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
@@ -53,29 +51,6 @@ export default function Settings() {
             </header>
 
             <div className="px-6 space-y-8">
-                <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
-                        Appearance
-                    </h2>
-                    <div className="grid grid-cols-3 gap-3">
-                        {themes.map((t) => (
-                            <div
-                                key={t.value}
-                                onClick={() => setTheme(t.value)}
-                                className={cn(
-                                    "p-4 rounded-2xl flex flex-col items-center gap-2 transition-all cursor-pointer border backdrop-blur-sm shadow-sm",
-                                    theme === t.value
-                                        ? "bg-primary/20 border-primary text-primary font-bold scale-[1.05]"
-                                        : "bg-surface border-border-color hover:bg-black/5 dark:hover:bg-white/5"
-                                )}
-                            >
-                                <t.icon size={22} />
-                                <span className="text-xs">{t.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Auto Export
@@ -93,7 +68,7 @@ export default function Settings() {
                                         "p-3 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border backdrop-blur-sm",
                                         exportSettings.frequency === f.value
                                             ? "bg-primary/20 border-primary text-primary font-bold"
-                                            : "bg-black/5 dark:bg-white/5 border-transparent hover:bg-black/10 dark:hover:bg-white/10"
+                                            : "bg-surface border-transparent hover:bg-black/5"
                                     )}
                                 >
                                     <f.icon size={18} />
@@ -103,7 +78,7 @@ export default function Settings() {
                         </div>
                         {exportSettings.lastExport > 0 && (
                             <p className="text-[10px] text-center text-text-muted italic opacity-50">
-                                Last export: {new Date(exportSettings.lastExport).toLocaleDateString()}
+                                Last export: {formatDate(new Date(exportSettings.lastExport), { month: 'short', day: 'numeric', year: 'numeric' })}
                             </p>
                         )}
                     </GlassCard>
@@ -116,9 +91,9 @@ export default function Settings() {
                     <div className="space-y-3">
                         <GlassCard
                             onClick={() => exportData('json')}
-                            className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
-                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0 shadow-inner">
+                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-600/10 flex items-center justify-center text-green-600 shrink-0">
                                 <FileJson size={22} />
                             </div>
                             <div className="flex-1">
@@ -130,9 +105,9 @@ export default function Settings() {
 
                         <GlassCard
                             onClick={() => exportData('csv')}
-                            className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
-                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-600/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-inner">
+                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-600/10 flex items-center justify-center text-blue-600 shrink-0">
                                 <FileSpreadsheet size={22} />
                             </div>
                             <div className="flex-1">
@@ -157,9 +132,9 @@ export default function Settings() {
                     />
                     <GlassCard
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
+                        className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                     >
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-600/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-inner">
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-600/10 flex items-center justify-center text-indigo-600 shrink-0">
                             <Upload size={22} />
                         </div>
                         <div className="flex-1">

@@ -232,24 +232,29 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     const homeExpenses = useMemo(() => {
         const threeMonthsAgo = new Date();
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        threeMonthsAgo.setHours(0, 0, 0, 0);
+        const threshold = threeMonthsAgo.toISOString().split('T')[0];
 
-        return expenses.filter(e => new Date(e.date) >= threeMonthsAgo)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return expenses
+            .filter(e => e.date >= threshold)
+            .sort((a, b) => b.date.localeCompare(a.date));
     }, [expenses]);
 
     const totalForPeriod = useMemo(() => filteredExpenses.reduce((sum, e) => sum + e.amount, 0), [filteredExpenses]);
     const homeTotal = useMemo(() => homeExpenses.reduce((sum, e) => sum + e.amount, 0), [homeExpenses]);
 
-    const currentMonthExpenses = useMemo(() => {
+    const { currentMonthTotal, currentMonthExpenses } = useMemo(() => {
         const now = new Date();
-        return expenses.filter(e => {
+        const curM = now.getMonth();
+        const curY = now.getFullYear();
+        let total = 0;
+        const filtered = expenses.filter(e => {
             const date = new Date(e.date);
-            return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            const isMatch = date.getMonth() === curM && date.getFullYear() === curY;
+            if (isMatch) total += e.amount;
+            return isMatch;
         });
+        return { currentMonthTotal: total, currentMonthExpenses: filtered };
     }, [expenses]);
-
-    const currentMonthTotal = useMemo(() => currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
 
     const visibleCategories = useMemo(() => {
         return categories.filter(c => !hiddenCategoryIds.includes(c.id));

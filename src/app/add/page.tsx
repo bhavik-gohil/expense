@@ -67,7 +67,10 @@ function AddExpenseContent() {
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-            <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+            <header
+                className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md"
+                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+            >
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full">
                     <ArrowLeft size={24} />
                 </button>
@@ -82,7 +85,7 @@ function AddExpenseContent() {
             </header>
 
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                     <input
                         type="number"
                         step="0.01"
@@ -95,24 +98,7 @@ function AddExpenseContent() {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="relative">
-                        <input
-                            type="date"
-                            required
-                            value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            className="w-full bg-surface border border-border-color rounded-2xl py-3 pl-12 pr-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-text-main dark:[color-scheme:dark]"
-                        />
-                    </div>
-                    <input
-                        type="text"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Add a note..."
-                        className="w-full bg-surface border border-border-color rounded-2xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 placeholder:text-text-muted/50 text-text-main"
-                    />
-                </div>
+
 
                 <section>
                     <div className="flex justify-between items-center mb-4">
@@ -128,20 +114,39 @@ function AddExpenseContent() {
                                 key={cat.id}
                                 onClick={() => setFormData({ ...formData, categoryId: cat.id })}
                                 className={cn(
-                                    "flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all cursor-pointer",
+                                    "flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all cursor-pointer border-2 border-transparent",
                                     formData.categoryId === cat.id
-                                        ? "bg-secondary-container text-on-secondary-container scale-105 shadow-md ring-2 ring-secondary"
-                                        : "bg-surface-container hover:bg-surface-container-high text-on-surface"
+                                        ? "bg-primary/5 border-primary scale-105"
+                                        : "hover:bg-text-main/5"
                                 )}
                             >
-                                <span className="text-3xl">{cat.emoji}</span>
+                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
+                                    {cat.emoji}
+                                </div>
                                 <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
                             </div>
                         ))}
                     </div>
                 </section>
 
-
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="relative">
+                        <input
+                            type="date"
+                            required
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            className="w-full bg-surface border border-border-color rounded-2xl py-3 pl-3 pr-3 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-text-main dark:[color-scheme:dark]"
+                        />
+                    </div>
+                    <input
+                        type="text"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Add a note..."
+                        className="w-full bg-surface border border-border-color rounded-2xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 placeholder:text-text-muted/50 text-text-main"
+                    />
+                </div>
 
                 <div className="flex gap-3">
                     <GlassButton type="submit" className="flex-1 text-base">
