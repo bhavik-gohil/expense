@@ -32,15 +32,15 @@ export default function Home() {
   const monthLabel = useMemo(() => formatFullMonth(new Date()), []);
 
   return (
-    <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
+    <main className="flex min-h-full flex-col bg-surface text-on-surface pb-40">
       <header
-        className="px-6 pt-14 pb-8 sticky top-0 z-10 backdrop-blur-md"
+        className="px-6 py-6 sticky top-0 z-10 backdrop-blur-md"
         style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
       >
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
-            <p className="text-5xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
+            <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-green-600 mb-1">Okane</p>
@@ -51,7 +51,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="px-5 space-y-6">
+      <div className="px-5 pt-4 space-y-6">
         {groupedExpenses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-on-surface-variant opacity-50">
             <List size={56} strokeWidth={1} className="mb-4" />

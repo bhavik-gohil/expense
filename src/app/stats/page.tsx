@@ -118,12 +118,9 @@ export default function Stats() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 pt-14 pb-4 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                className="px-6 py-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
             >
-                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
-                    <ArrowLeft size={24} />
-                </button>
                 <h1 className="text-xl font-bold">Statistics</h1>
             </header>
 

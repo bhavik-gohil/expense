@@ -40,16 +40,13 @@ export default function Settings() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 pt-14 pb-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                className="px-6 py-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
             >
-                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
-                    <ArrowLeft size={24} />
-                </button>
                 <h1 className="text-xl font-bold">Settings</h1>
             </header>
 
-            <div className="px-6 space-y-8">
+            <div className="px-6 pt-4 space-y-8">
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Auto Export

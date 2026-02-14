@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
-  basePath: "/expense",
-  trailingSlash: true,
   images: { unoptimized: true },
+  // basePath: "/expense",
+  // trailingSlash: true,
 };
 
 export default nextConfig;

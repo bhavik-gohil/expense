@@ -6,7 +6,7 @@ import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard, GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
-const DEFAULT_QUICK_PICK = ["🍔", "🛒", "🚗", "🏠", "💡", "🛡️", "💊", "🎮", "🎁", "✈️"];
+const DEFAULT_QUICK_PICK = ["🍔", "🛒", "🚗", "🏠", "💡", "💊", "🎮", "🎁", "✈️"];
 const QUICK_PICK_KEY = "m3_quick_pick_emojis";
 
 export default function ManageTypes() {
@@ -167,7 +167,7 @@ export default function ManageTypes() {
                     </h2>
                     <div className="space-y-2">
                         {categories.map(cat => (
-                            <div key={cat.id} className="flex items-center gap-4 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                            <div key={cat.id} className="flex items-center gap-4 py-3 px-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                                 <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
                                     {cat.emoji}
                                 </div>
