@@ -25,7 +25,6 @@ export function AutoExport() {
 
         if (shouldExport) {
             console.log("Triggering auto-export...");
-            // Small delay to ensure UI is ready
             const timer = setTimeout(() => {
                 exportData('json');
             }, 3000);

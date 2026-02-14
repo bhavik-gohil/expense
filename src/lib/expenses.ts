@@ -1,4 +1,3 @@
-// Expense type definition
 export interface Expense {
     id: string;
     amount: number;
@@ -8,17 +7,14 @@ export interface Expense {
     timestamp: number;
 }
 
-// Local storage key
 const STORAGE_KEY = 'woof_expenses';
 
-// Get all expenses
 export const getExpenses = (): Expense[] => {
     if (typeof window === 'undefined') return [];
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
 };
 
-// Add new expense
 export const addExpense = (expense: Omit<Expense, 'id' | 'timestamp'>): Expense => {
     const newExpense: Expense = {
         ...expense,
@@ -27,13 +23,12 @@ export const addExpense = (expense: Omit<Expense, 'id' | 'timestamp'>): Expense 
     };
 
     const expenses = getExpenses();
-    expenses.unshift(newExpense); // Add to beginning
+    expenses.unshift(newExpense); 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
 
     return newExpense;
 };
 
-// Update expense
 export const updateExpense = (id: string, updates: Partial<Expense>): void => {
     const expenses = getExpenses();
     const index = expenses.findIndex(e => e.id === id);
@@ -44,20 +39,17 @@ export const updateExpense = (id: string, updates: Partial<Expense>): void => {
     }
 };
 
-// Delete expense
 export const deleteExpense = (id: string): void => {
     const expenses = getExpenses();
     const filtered = expenses.filter(e => e.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 };
 
-// Get total expenses
 export const getTotalExpenses = (): number => {
     const expenses = getExpenses();
     return expenses.reduce((sum, expense) => sum + expense.amount, 0);
 };
 
-// Get expenses by category
 export const getExpensesByCategory = (): Record<string, number> => {
     const expenses = getExpenses();
     return expenses.reduce((acc, expense) => {

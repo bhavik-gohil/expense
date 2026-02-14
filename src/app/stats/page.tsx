@@ -19,7 +19,6 @@ export default function Stats() {
     const router = useRouter();
     const { expenses, categories } = useExpenses();
 
-    // Month navigator state
     const [monthOffset, setMonthOffset] = useState(0);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const dateStripRef = useRef<HTMLDivElement>(null);
@@ -30,25 +29,21 @@ export default function Stats() {
         return d;
     }, [monthOffset]);
 
-    // Reset selected day when month changes
     useEffect(() => { setSelectedDay(null); }, [monthOffset]);
 
     const monthLabel = useMemo(() => formatFullMonth(selectedMonth), [selectedMonth]);
 
-    // Days in the selected month with padding for grid alignment
     const calendarData = useMemo(() => {
         const y = selectedMonth.getFullYear();
         const m = selectedMonth.getMonth();
-        const firstDay = new Date(y, m, 1).getDay(); // 0 = Sun, 1 = Mon...
+        const firstDay = new Date(y, m, 1).getDay(); 
         const daysInMonth = new Date(y, m + 1, 0).getDate();
         const todayStr = new Date().toDateString();
 
         const days = [];
-        // Add empty slots for days before the 1st
         for (let i = 0; i < firstDay; i++) {
             days.push({ day: null, fullDate: null, isToday: false });
         }
-        // Add actual days
         for (let i = 1; i <= daysInMonth; i++) {
             const d = new Date(y, m, i);
             days.push({
@@ -60,7 +55,6 @@ export default function Stats() {
         return days;
     }, [selectedMonth]);
 
-    // Filter expenses for the selected month (and optionally day)
     const monthExpenses = useMemo(() => {
         const m = selectedMonth.getMonth();
         const y = selectedMonth.getFullYear();
@@ -74,7 +68,6 @@ export default function Stats() {
 
     const monthTotal = useMemo(() => monthExpenses.reduce((s, e) => s + e.amount, 0), [monthExpenses]);
 
-    // Category breakdown
     const chartData = useMemo(() => {
         const map: Record<string, { name: string; emoji: string; value: number }> = {};
         monthExpenses.forEach(exp => {
@@ -87,7 +80,6 @@ export default function Stats() {
         return Object.values(map).sort((a, b) => b.value - a.value);
     }, [monthExpenses, categories]);
 
-    // Month-on-month trend (last 6 months from selected)
     const momData = useMemo(() => {
         const months: { month: string; amount: number; sortKey: string }[] = [];
         for (let i = 5; i >= 0; i--) {
@@ -108,7 +100,7 @@ export default function Stats() {
             });
         }
         return months;
-    }, [expenses, selectedMonth]);    // Custom Tooltip component for 100% solid background
+    }, [expenses, selectedMonth]);    
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
@@ -125,7 +117,6 @@ export default function Stats() {
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-            {/* Header */}
             <header
                 className="px-6 pt-14 pb-4 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
@@ -136,7 +127,6 @@ export default function Stats() {
                 <h1 className="text-xl font-bold">Statistics</h1>
             </header>
 
-            {/* Month Navigator — Meow style */}
             <div className="flex items-center justify-between px-6 py-4">
                 <button
                     onClick={() => setMonthOffset(p => p + 1)}
@@ -157,9 +147,7 @@ export default function Stats() {
                 </button>
             </div>
 
-            {/* Calendar Grid — Meow style */}
             <div className="px-6 pb-6 w-full">
-                {/* Weekday Headers */}
                 <div className="grid grid-cols-7 mb-2 text-center">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
                         <span key={d} className="text-[10px] font-bold text-on-surface-variant opacity-50">
@@ -167,7 +155,6 @@ export default function Stats() {
                         </span>
                     ))}
                 </div>
-                {/* Days Grid */}
                 <div className="grid grid-cols-7 gap-y-2 gap-x-1">
                     {calendarData.map((item, index) => {
                         if (!item.day) return <div key={`empty-${index}`} />;
@@ -205,7 +192,6 @@ export default function Stats() {
                     </GlassCard>
                 ) : (
                     <>
-                        {/* Donut Chart with total in center */}
                         <GlassCard className="p-6 overflow-visible">
                             <div className="relative h-56 overflow-visible">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -225,7 +211,6 @@ export default function Stats() {
                                         <Tooltip content={<CustomTooltip />} wrapperStyle={{ zIndex: 100 }} />
                                     </PieChart>
                                 </ResponsiveContainer>
-                                {/* Center label */}
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Total</span>
                                     <span className="text-xl font-extrabold tabular-nums">{monthTotal.toFixed(2)}</span>
@@ -233,7 +218,6 @@ export default function Stats() {
                             </div>
                         </GlassCard>
 
-                        {/* Category Breakdown List */}
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">Breakdown</h2>
                             <div className="flex flex-col gap-2">
@@ -251,7 +235,6 @@ export default function Stats() {
                                                 <span className="text-xs font-bold text-text-muted">{pct.toFixed(0)}%</span>
                                                 <span className="font-black text-sm tabular-nums">{item.value.toFixed(2)}</span>
                                             </div>
-                                            {/* Percentage bar */}
                                             <div className="h-2 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shadow-inner">
                                                 <div
                                                     className="h-full rounded-full transition-all duration-500 shadow-sm"
@@ -267,7 +250,6 @@ export default function Stats() {
                             </div>
                         </section>
 
-                        {/* Month-on-Month Trend */}
                         <GlassCard className="p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted">6-Month Trend</h2>

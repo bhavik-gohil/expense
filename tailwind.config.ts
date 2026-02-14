@@ -6,28 +6,24 @@ const config: Config = {
         "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
         "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
-    darkMode: 'class', // Enforce class strategy
+    darkMode: 'class', 
     theme: {
         extend: {
             colors: {
-                // Semantic Colors
                 background: "rgb(var(--bg-page))",
-                page: "rgb(var(--bg-page))", // Component background
+                page: "rgb(var(--bg-page))", 
                 surface: "rgb(var(--card-bg))",
                 "border-color": "rgb(var(--border-color))",
                 primary: "rgb(var(--primary))",
                 "on-primary": "rgb(var(--on-primary))",
 
-                // Text
                 "text-main": "rgb(var(--text-main))",
                 "text-muted": "rgb(var(--text-muted))",
 
-                // Accents (for data)
                 "accent-blue": "rgb(var(--accent-blue))",
                 "accent-purple": "rgb(var(--accent-purple))",
                 "accent-pink": "rgb(var(--accent-pink))",
 
-                // Legacy M3 Mappings (Backwards Compat)
                 "m3-surface": "rgb(var(--m3-surface))",
                 "m3-on-surface": "rgb(var(--m3-on-surface))",
                 "m3-surface-variant": "rgb(var(--m3-surface-variant))",

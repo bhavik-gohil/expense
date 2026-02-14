@@ -21,7 +21,6 @@ function AddExpenseContent() {
         type: 'expense'
     });
 
-    // Derived state for back-compat
     const isEditing = !!editId;
 
     useEffect(() => {
@@ -74,7 +73,7 @@ function AddExpenseContent() {
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full">
                     <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-xl font-medium">{editId ? "Edit Expense" : "New Expense"}</h1>
+                <h1 className="text-xl font-medium">{editId ? "Edit" : "New"}</h1>
                 {editId ? (
                     <button onClick={handleDelete} className="p-2 text-error hover:bg-error/10 rounded-full">
                         <Trash2 size={24} />

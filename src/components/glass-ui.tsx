@@ -2,7 +2,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-// Solid Card component
 export const GlassCard = ({ children, className, onClick }: { children: React.ReactNode, className?: string, onClick?: () => void }) => (
     <div
         onClick={onClick}

@@ -9,8 +9,8 @@ import { BottomNav } from "@/components/BottomNav";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Expense Tracker",
-  description: "Material 3 Expense Tracker",
+  title: "Okane",
+  description: "Expense Tracker",
 };
 
 export default function RootLayout({

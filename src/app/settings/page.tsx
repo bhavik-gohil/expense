@@ -149,8 +149,10 @@ export default function Settings() {
                     )}
                 </section>
 
-                <div className="pt-6 opacity-30 text-center">
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Expense Tracker · v2.0</p>
+                <div className="pt-6 text-center">
+                    <p className="text-[12px]">Simple and Secure : Data is stored locally on your device.</p>
+                    <p className="mt-2 text-[12px] opacity-60 font-bold ">Visit @ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
+                    <p className="mt-2 text-[10px] opacity-40 font-bold uppercase tracking-widest">Okane · v1.0</p>
                 </div>
             </div>
         </main>

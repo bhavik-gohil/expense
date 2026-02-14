@@ -36,14 +36,13 @@ export default function ManageTypes() {
 
     const addToQuickPick = () => {
         if (!customEmoji || quickPickEmojis.includes(customEmoji)) return;
-        const newList = [customEmoji, ...quickPickEmojis].slice(0, 20); // Keep last 20
+        const newList = [customEmoji, ...quickPickEmojis].slice(0, 20); 
         saveQuickPick(newList);
     };
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
-        // Correct signature: addCategory({ name, emoji })
         addCategory({ name: name.trim(), emoji });
         setName("");
         setEmoji("💰");
@@ -52,7 +51,6 @@ export default function ManageTypes() {
     };
 
     const handleCustomEmojiInput = (value: string) => {
-        // Take only the last entered emoji character(s)
         const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
         const matches = value.match(emojiRegex);
         if (matches && matches.length > 0) {
@@ -73,7 +71,7 @@ export default function ManageTypes() {
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-xl font-bold">Expense Types</h1>
+                <h1 className="text-xl font-bold">Categories</h1>
                 <div className="w-10" />
             </header>
 
@@ -84,7 +82,7 @@ export default function ManageTypes() {
                         className="flex items-center justify-center gap-2 py-6 border-2 border-dashed border-border-color bg-transparent shadow-none cursor-pointer hover:bg-surface-container"
                     >
                         <Plus size={20} className="text-primary" />
-                        <span className="font-semibold text-primary">Create New Type</span>
+                        <span className="font-semibold text-primary">New Category</span>
                     </GlassCard>
                 ) : (
                     <GlassCard className="p-6 space-y-5">
@@ -132,7 +130,7 @@ export default function ManageTypes() {
                                             value={customEmoji}
                                             onChange={(e) => handleCustomEmojiInput(e.target.value)}
                                             placeholder="Add Emoji"
-                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-lg text-text-main placeholder:text-text-muted/50"
+                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-text-main placeholder:text-text-muted/50"
                                         />
                                     </div>
                                     <button
@@ -152,13 +150,13 @@ export default function ManageTypes() {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="Category"
+                                    placeholder="Category name"
                                     className="w-full bg-surface border border-border-color rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-text-main placeholder:text-text-muted/50"
                                     required
                                 />
                             </div>
 
-                            <GlassButton className="w-full py-3">Create Category</GlassButton>
+                            <GlassButton className="w-full py-3">Create</GlassButton>
                         </form>
                     </GlassCard>
                 )}

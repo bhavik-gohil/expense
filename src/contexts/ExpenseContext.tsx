@@ -13,7 +13,7 @@ export interface Expense {
     amount: number;
     categoryId: string;
     description: string;
-    date: string; // ISO string YYYY-MM-DD
+    date: string; 
     timestamp: number;
 }
 
@@ -37,8 +37,8 @@ interface ExpenseContextType {
     deleteExpense: (id: string) => void;
     addCategory: (category: Omit<Category, 'id' | 'isCustom'>) => void;
     deleteCategory: (id: string) => void;
-    filteredExpenses: Expense[]; // For Stats Page
-    homeExpenses: Expense[]; // Last 3 months for Home Page
+    filteredExpenses: Expense[]; 
+    homeExpenses: Expense[]; 
     totalForPeriod: number;
     homeTotal: number;
     currentMonthTotal: number;
@@ -132,14 +132,12 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     };
 
     const deleteCategory = (id: string) => {
-        // Deleting category does not delete expenses (requirement)
         const categoryToDelete = categories.find(c => c.id === id);
         if (!categoryToDelete) return;
 
         if (categoryToDelete.isCustom) {
             saveCategories(categories.filter(c => c.id !== id || !c.isCustom));
         } else {
-            // It's a default category, hide it
             const newHidden = [...hiddenCategoryIds, id];
             setHiddenCategoryIds(newHidden);
             localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(newHidden));
@@ -202,13 +200,11 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
     const filteredExpenses = useMemo(() => {
         const now = new Date();
-        // now.setHours(23, 59, 59, 999); // Removed as it's not needed for general filter logic
 
         return expenses.filter(expense => {
             const expDate = new Date(expense.date);
 
             if (filterPeriod === 'custom' && customRange) {
-                // Ensure custom range end date includes the entire day
                 const customEndDate = new Date(customRange.end);
                 customEndDate.setHours(23, 59, 59, 999);
                 return expDate >= new Date(customRange.start) && expDate <= customEndDate;
@@ -219,10 +215,8 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             }
 
             const diffDays = (now.getTime() - expDate.getTime()) / (1000 * 60 * 60 * 24);
-            // For '1', '7', '30' days, we want to include today.
-            // expDate should be greater than or equal to (now - filterPeriod days)
             const filterDate = new Date(now);
-            filterDate.setDate(now.getDate() - parseInt(filterPeriod) + 1); // +1 to include today
+            filterDate.setDate(now.getDate() - parseInt(filterPeriod) + 1);
             filterDate.setHours(0, 0, 0, 0);
 
             return expDate >= filterDate;

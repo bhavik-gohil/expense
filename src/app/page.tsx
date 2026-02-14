@@ -29,12 +29,10 @@ export default function Home() {
       });
   }, [homeExpenses]);
 
-  // Format the current month name
   const monthLabel = useMemo(() => formatFullMonth(new Date()), []);
 
   return (
     <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-      {/* Header */}
       <header
         className="px-6 pt-14 pb-8 sticky top-0 z-10 backdrop-blur-md"
         style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
@@ -44,13 +42,15 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
             <p className="text-5xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
           </div>
-          <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
-            💵
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-green-600 mb-1">Okane</p>
+            <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+              💵
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Expense Timeline */}
       <div className="px-5 space-y-6">
         {groupedExpenses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-on-surface-variant opacity-50">
@@ -61,7 +61,6 @@ export default function Home() {
         ) : (
           groupedExpenses.map(({ dateKey, dateLabel, items, dayTotal }) => (
             <section key={dateKey}>
-              {/* Date header with daily total */}
               <div className="flex justify-between items-center px-1 mb-3">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
                   {dateLabel}
@@ -70,7 +69,6 @@ export default function Home() {
                   {dayTotal.toFixed(2)}
                 </span>
               </div>
-              {/* Expense items */}
               <div className="flex flex-col gap-3">
                 {items.map((item) => (
                   <ExpenseItem
@@ -85,7 +83,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* FAB */}
       <GlassFAB icon={<Plus size={24} />} onClick={() => router.push('/add')} />
     </main>
   );
