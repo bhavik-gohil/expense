@@ -3,7 +3,6 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Upload, FileJson, FileSpreadsheet, Bell, BellOff, Clock, Sun, Moon, Monitor, Check } from "lucide-react";
 import { useExpenses, ExportFrequency } from "@/contexts/ExpenseContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { GlassCard } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
