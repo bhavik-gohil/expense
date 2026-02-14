@@ -1,11 +1,13 @@
 "use client";
 import React, { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, List, BarChart3, ChevronRight, Settings } from "lucide-react";
 import { useExpenses } from "@/contexts/ExpenseContext";
-import { M3Card, FAB } from "@/components/m3-ui";
+import { GlassCard, GlassFAB } from "@/components/glass-ui";
 
 export default function Home() {
+  const router = useRouter();
   const { homeExpenses, currentMonthTotal, categories } = useExpenses();
 
   const groupedExpenses = useMemo(() => {
@@ -38,25 +40,16 @@ export default function Home() {
   const monthLabel = new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
   return (
-    <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-24">
+    <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
       {/* Header */}
-      <header className="px-6 pt-14 pb-8 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+      <header className="px-6 pt-14 pb-8 sticky top-0 bg-page/90 backdrop-blur-sm z-10  transition-all">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">{monthLabel}</p>
-            <p className="text-5xl font-extrabold tracking-tight">{currentMonthTotal.toFixed(2)}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
+            <p className="text-5xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/stats">
-              <div className="p-3 rounded-full bg-secondary-container text-on-secondary-container hover:scale-110 active:scale-95 transition-transform">
-                <BarChart3 size={22} />
-              </div>
-            </Link>
-            <Link href="/settings">
-              <div className="p-3 rounded-full bg-surface-container-high text-on-surface-variant hover:scale-110 active:scale-95 transition-transform">
-                <Settings size={22} />
-              </div>
-            </Link>
+          <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center">
+            <img src="/favicon.ico" alt="Logo" className="w-8 h-8 opacity-100" />
           </div>
         </div>
       </header>
@@ -86,24 +79,25 @@ export default function Home() {
                 {items.map((item) => {
                   const category = categories.find(c => c.id === item.categoryId);
                   return (
-                    <Link href={`/add?edit=${item.id}`} key={item.id} className="block">
-                      <M3Card className="flex items-center gap-4 px-4 py-4 hover:bg-surface-container-high active:scale-[0.98] transition-all">
+                    <Link href={`/add?edit=${item.id}`} key={item.id} className="block group">
+                      <GlassCard className="flex items-center gap-4 px-5 py-4 group-hover:bg-white/20 dark:group-hover:bg-white/10 transition-colors">
                         {/* Icon — spans both rows */}
-                        <div className="w-11 h-11 rounded-2xl bg-tertiary-container flex items-center justify-center text-[22px] shrink-0 self-center">
+                        <div className="w-12 h-12 rounded-2xl bg-text-main/5 flex items-center justify-center text-[24px] shrink-0 self-center shadow-inner text-text-main">
                           {category?.emoji || '💰'}
                         </div>
                         {/* Middle: name + time stacked */}
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-[15px] leading-tight truncate">
-                            {category?.name || 'Uncategorized'}{item.description ? ` — ${item.description}` : ''}
+                          <p className="font-bold text-[15px] leading-tight truncate text-text-main">
+                            {category?.name || 'Uncategorized'}
+                            {item.description && <span className="opacity-70 font-normal"> - {item.description}</span>}
                           </p>
-                          <p className="text-[11px] text-on-surface-variant mt-1">
+                          <p className="text-[11px] font-bold text-on-surface-variant opacity-60 mt-1 uppercase tracking-wide">
                             {new Date(item.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                         {/* Amount — spans both rows */}
-                        <span className="font-bold text-base tabular-nums shrink-0 self-center">{item.amount.toFixed(2)}</span>
-                      </M3Card>
+                        <span className="font-black text-lg tabular-nums shrink-0 self-center tracking-tight text-text-main">{item.amount.toFixed(2)}</span>
+                      </GlassCard>
                     </Link>
                   );
                 })}
@@ -114,9 +108,7 @@ export default function Home() {
       </div>
 
       {/* FAB */}
-      <Link href="/add">
-        <FAB icon={<Plus size={24} />} onClick={() => { }} />
-      </Link>
+      <GlassFAB icon={<Plus size={24} />} onClick={() => router.push('/add')} />
     </main>
   );
 }

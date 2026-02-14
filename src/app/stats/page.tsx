@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ChevronLeft, ChevronRight, TrendingUp, PieChart as PieIcon } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from "recharts";
 import { useExpenses } from "@/contexts/ExpenseContext";
-import { M3Card } from "@/components/m3-ui";
+import { GlassCard } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
 const CHART_COLORS = [
@@ -111,9 +111,9 @@ export default function Stats() {
 
 
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12 max-w-[100vw] overflow-x-hidden">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40 max-w-[100vw] overflow-x-hidden">
             {/* Header */}
-            <header className="px-6 pt-14 pb-2 flex items-center gap-4 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+            <header className="px-6 pt-14 pb-2 flex items-center gap-4 sticky top-0 bg-transparent backdrop-blur-md z-10">
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
@@ -183,14 +183,14 @@ export default function Stats() {
 
             <div className="px-6 space-y-6">
                 {chartData.length === 0 ? (
-                    <M3Card className="py-20 flex flex-col items-center justify-center opacity-40">
+                    <GlassCard className="py-20 flex flex-col items-center justify-center opacity-40">
                         <PieIcon size={48} strokeWidth={1} className="mb-4" />
                         <p className="font-medium">No expenses this month</p>
-                    </M3Card>
+                    </GlassCard>
                 ) : (
                     <>
                         {/* Donut Chart with total in center */}
-                        <M3Card className="p-6">
+                        <GlassCard className="p-6">
                             <div className="relative h-56">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -208,10 +208,10 @@ export default function Stats() {
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{
-                                                backgroundColor: 'rgb(var(--m3-surface-container-high))',
-                                                border: 'none',
+                                                backgroundColor: 'rgb(var(--card-bg))',
+                                                border: '1px solid rgb(var(--border-color))',
                                                 borderRadius: '12px',
-                                                color: 'rgb(var(--m3-on-surface))',
+                                                color: 'rgb(var(--text-main))',
                                                 fontSize: '13px',
                                             }}
                                             formatter={(value: number) => [value.toFixed(2), '']}
@@ -220,51 +220,51 @@ export default function Stats() {
                                 </ResponsiveContainer>
                                 {/* Center label */}
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Total</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Total</span>
                                     <span className="text-xl font-extrabold tabular-nums">{monthTotal.toFixed(2)}</span>
                                 </div>
                             </div>
-                        </M3Card>
+                        </GlassCard>
 
                         {/* Category Breakdown List */}
                         <section>
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3 px-1">Breakdown</h2>
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">Breakdown</h2>
                             <div className="flex flex-col gap-2">
                                 {chartData.map((item, i) => {
                                     const pct = monthTotal > 0 ? (item.value / monthTotal) * 100 : 0;
                                     return (
-                                        <M3Card key={item.name} className="p-4">
-                                            <div className="flex items-center gap-3 mb-2">
+                                        <GlassCard key={item.name} className="p-4 flex flex-col gap-3">
+                                            <div className="flex items-center gap-3">
                                                 <div
-                                                    className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-                                                    style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] + '22' }}
+                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-inner"
+                                                    style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] + '40' }}
                                                 >
                                                     {item.emoji}
                                                 </div>
-                                                <span className="font-semibold text-sm flex-1 truncate">{item.name}</span>
-                                                <span className="text-xs font-bold text-on-surface-variant">{pct.toFixed(0)}%</span>
-                                                <span className="font-bold text-sm tabular-nums">{item.value.toFixed(2)}</span>
+                                                <span className="font-bold text-sm flex-1 truncate">{item.name}</span>
+                                                <span className="text-xs font-bold text-text-muted">{pct.toFixed(0)}%</span>
+                                                <span className="font-black text-sm tabular-nums">{item.value.toFixed(2)}</span>
                                             </div>
                                             {/* Percentage bar */}
-                                            <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                                            <div className="h-2 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shadow-inner">
                                                 <div
-                                                    className="h-full rounded-full transition-all duration-500"
+                                                    className="h-full rounded-full transition-all duration-500 shadow-sm"
                                                     style={{
                                                         width: `${pct}%`,
                                                         backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
                                                     }}
                                                 />
                                             </div>
-                                        </M3Card>
+                                        </GlassCard>
                                     );
                                 })}
                             </div>
                         </section>
 
                         {/* Month-on-Month Trend */}
-                        <M3Card className="p-6">
+                        <GlassCard className="p-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">6-Month Trend</h2>
+                                <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted">6-Month Trend</h2>
                                 <TrendingUp size={16} className="text-primary" />
                             </div>
                             <div className="h-44">
@@ -274,23 +274,24 @@ export default function Stats() {
                                             dataKey="month"
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fontSize: 11, fontWeight: 700, fill: 'rgb(var(--m3-on-surface-variant))' }}
+                                            tick={{ fontSize: 11, fontWeight: 700, fill: 'rgb(var(--text-muted))' }}
                                         />
                                         <Tooltip
-                                            cursor={{ fill: 'rgba(var(--m3-primary), 0.06)' }}
+                                            cursor={{ fill: 'rgba(var(--primary), 0.06)' }}
                                             contentStyle={{
-                                                backgroundColor: 'rgb(var(--m3-surface-container-high))',
-                                                border: 'none',
+                                                backgroundColor: 'rgb(var(--card-bg))',
+                                                border: '1px solid rgb(var(--border-color))',
                                                 borderRadius: '12px',
+                                                color: 'rgb(var(--text-main))',
                                                 fontSize: '13px',
                                             }}
                                             formatter={(value: number) => [value.toFixed(2), 'Spent']}
                                         />
-                                        <Bar dataKey="amount" fill="rgb(var(--m3-primary))" radius={[8, 8, 0, 0]} />
+                                        <Bar dataKey="amount" fill="rgb(var(--primary))" radius={[8, 8, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
-                        </M3Card>
+                        </GlassCard>
                     </>
                 )}
             </div>

@@ -2,141 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Material 3 Light Palette ──────────────────────────── */
-:root,
-[data-theme="light"] {
-  --m3-primary: 103, 80, 164;
-  --m3-on-primary: 255, 255, 255;
-  --m3-primary-container: 234, 221, 255;
-  --m3-on-primary-container: 33, 0, 93;
+@layer base {
+  :root {
+    /* High-Performance Minimal Theme */
+    /* Light Mode: Ceramic White */
+    --bg-page: 250, 250, 252;
+    /* #FAFAFC */
+    --card-bg: 255, 255, 255;
+    --border-color: 228, 228, 231;
+    /* Zinc 200 */
 
-  --m3-secondary: 98, 91, 113;
-  --m3-on-secondary: 255, 255, 255;
-  --m3-secondary-container: 232, 222, 248;
-  --m3-on-secondary-container: 30, 25, 43;
+    --text-main: 24, 24, 27;
+    /* Zinc 900 */
+    --text-muted: 113, 113, 122;
+    /* Zinc 500 */
 
-  --m3-tertiary: 125, 82, 96;
-  --m3-on-tertiary: 255, 255, 255;
-  --m3-tertiary-container: 255, 216, 228;
-  --m3-on-tertiary-container: 49, 17, 29;
+    /* Action Colors (Solid, High Contrast) */
+    --primary: 24, 24, 27;
+    /* Black */
+    --on-primary: 255, 255, 255;
 
-  --m3-error: 179, 38, 30;
-  --m3-on-error: 255, 255, 255;
-  --m3-error-container: 249, 222, 220;
-  --m3-on-error-container: 65, 14, 11;
+    /* Data Accents (Kept vibrant for charts) */
+    --accent-blue: 37, 99, 235;
+    --accent-purple: 124, 58, 237;
+    --accent-pink: 219, 39, 119;
 
-  --m3-surface: 254, 247, 255;
-  --m3-on-surface: 29, 27, 32;
-  --m3-surface-variant: 231, 224, 236;
-  --m3-on-surface-variant: 73, 69, 79;
-  --m3-outline: 121, 116, 126;
+    /* Legacy Mappings */
+    --m3-surface: 250, 250, 252;
+    --m3-on-surface: 24, 24, 27;
+    --m3-surface-variant: 255, 255, 255;
+    --m3-on-surface-variant: 113, 113, 122;
+    --m3-primary: 24, 24, 27;
+  }
 
-  --m3-surface-container-lowest: 255, 255, 255;
-  --m3-surface-container-low: 247, 242, 250;
-  --m3-surface-container: 243, 237, 247;
-  --m3-surface-container-high: 236, 230, 240;
-  --m3-surface-container-highest: 230, 224, 233;
+  .dark {
+    /* Dark Mode: Matte Slate */
+    --bg-page: 9, 9, 11;
+    /* Zinc 950 */
+    --card-bg: 24, 24, 27;
+    /* Zinc 900 */
+    --border-color: 39, 39, 42;
+    /* Zinc 800 */
 
-  color-scheme: light;
-}
+    --text-main: 250, 250, 250;
+    /* Zinc 50 */
+    --text-muted: 161, 161, 170;
+    /* Zinc 400 */
 
-/* ── Material 3 Dark Palette ───────────────────────────── */
-[data-theme="dark"] {
-  --m3-primary: 208, 188, 255;
-  --m3-on-primary: 56, 30, 114;
-  --m3-primary-container: 79, 55, 139;
-  --m3-on-primary-container: 234, 221, 255;
+    --primary: 250, 250, 250;
+    /* White */
+    --on-primary: 9, 9, 11;
 
-  --m3-secondary: 204, 194, 220;
-  --m3-on-secondary: 51, 45, 65;
-  --m3-secondary-container: 74, 68, 88;
-  --m3-on-secondary-container: 232, 222, 248;
-
-  --m3-tertiary: 239, 184, 200;
-  --m3-on-tertiary: 73, 37, 50;
-  --m3-tertiary-container: 99, 59, 72;
-  --m3-on-tertiary-container: 255, 216, 228;
-
-  --m3-error: 242, 184, 181;
-  --m3-on-error: 96, 20, 16;
-  --m3-error-container: 140, 29, 24;
-  --m3-on-error-container: 249, 222, 220;
-
-  --m3-surface: 20, 18, 24;
-  --m3-on-surface: 230, 224, 230;
-  --m3-surface-variant: 73, 69, 79;
-  --m3-on-surface-variant: 202, 196, 208;
-  --m3-outline: 147, 143, 153;
-
-  --m3-surface-container-lowest: 15, 13, 19;
-  --m3-surface-container-low: 29, 27, 32;
-  --m3-surface-container: 33, 31, 38;
-  --m3-surface-container-high: 43, 41, 48;
-  --m3-surface-container-highest: 54, 52, 59;
-
-  color-scheme: dark;
-}
-
-/* System preference fallback (only when no explicit data-theme) */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --m3-primary: 208, 188, 255;
-    --m3-on-primary: 56, 30, 114;
-    --m3-primary-container: 79, 55, 139;
-    --m3-on-primary-container: 234, 221, 255;
-
-    --m3-secondary: 204, 194, 220;
-    --m3-on-secondary: 51, 45, 65;
-    --m3-secondary-container: 74, 68, 88;
-    --m3-on-secondary-container: 232, 222, 248;
-
-    --m3-tertiary: 239, 184, 200;
-    --m3-on-tertiary: 73, 37, 50;
-    --m3-tertiary-container: 99, 59, 72;
-    --m3-on-tertiary-container: 255, 216, 228;
-
-    --m3-error: 242, 184, 181;
-    --m3-on-error: 96, 20, 16;
-    --m3-error-container: 140, 29, 24;
-    --m3-on-error-container: 249, 222, 220;
-
-    --m3-surface: 20, 18, 24;
-    --m3-on-surface: 230, 224, 230;
-    --m3-surface-variant: 73, 69, 79;
-    --m3-on-surface-variant: 202, 196, 208;
-    --m3-outline: 147, 143, 153;
-
-    --m3-surface-container-lowest: 15, 13, 19;
-    --m3-surface-container-low: 29, 27, 32;
-    --m3-surface-container: 33, 31, 38;
-    --m3-surface-container-high: 43, 41, 48;
-    --m3-surface-container-highest: 54, 52, 59;
-
-    color-scheme: dark;
+    /* Legacy Mappings */
+    --m3-surface: 9, 9, 11;
+    --m3-on-surface: 250, 250, 250;
+    --m3-surface-variant: 24, 24, 27;
+    --m3-on-surface-variant: 161, 161, 170;
+    --m3-primary: 250, 250, 250;
   }
 }
 
-/* ── Base ──────────────────────────────────────────────── */
 body {
-  color: rgb(var(--m3-on-surface));
-  background: rgb(var(--m3-surface));
+  background-color: rgb(var(--bg-page));
+  color: rgb(var(--text-main));
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Removed transition to make it feel snappier */
 }
 
-/* Hide number input spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+@layer utilities {
+
+  /* Minimal Card Utility - NO BLUR */
+  .minimal-card {
+    background-color: rgb(var(--card-bg));
+    border: 1px solid rgb(var(--border-color));
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .dark .minimal-card {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    /* Slightly stronger shadow in dark mode */
+  }
+
+  /* Focus Ring for Accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+  }
 }
 
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Hide scrollbar but allow scrolling */
+/* Hide Scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -144,53 +98,4 @@ input[type="number"] {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* ── M3 Component Classes ──────────────────────────────── */
-@layer components {
-  .m3-card {
-    background-color: rgb(var(--m3-surface-container-low));
-    border-radius: 1.5rem;
-    padding: 1rem;
-    color: rgb(var(--m3-on-surface));
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .m3-button-filled {
-    background-color: rgb(var(--m3-primary));
-    color: rgb(var(--m3-on-primary));
-    padding: 0.75rem 1.5rem;
-    border-radius: 6.25rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transition: opacity 0.2s ease, transform 0.1s ease;
-  }
-
-  .m3-button-filled:hover {
-    opacity: 0.92;
-  }
-
-  .m3-button-filled:active {
-    transform: scale(0.97);
-  }
-
-  .m3-chip {
-    background-color: rgb(var(--m3-surface-container-high));
-    color: rgb(var(--m3-on-surface-variant));
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-  }
-
-  .m3-chip:active {
-    transform: scale(0.96);
-  }
-
-  .m3-chip.active {
-    background-color: rgb(var(--m3-secondary-container));
-    color: rgb(var(--m3-on-secondary-container));
-  }
 }

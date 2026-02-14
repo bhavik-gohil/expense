@@ -25,11 +25,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!mounted) return;
         const root = document.documentElement;
+
+        // Remove previous class/attribute
+        root.classList.remove("dark");
+        root.removeAttribute("data-theme");
+
         if (theme === "system") {
-            root.removeAttribute("data-theme");
-        } else {
-            root.setAttribute("data-theme", theme);
+            const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (systemDark) {
+                root.classList.add("dark");
+            }
+        } else if (theme === "dark") {
+            root.classList.add("dark");
         }
+        // Light is default (no class)
+
         localStorage.setItem(THEME_KEY, theme);
     }, [theme, mounted]);
 

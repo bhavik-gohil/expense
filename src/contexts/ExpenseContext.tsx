@@ -52,6 +52,7 @@ const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
 const EXPENSES_KEY = 'm3_expenses';
 const CATEGORIES_KEY = 'm3_categories';
+const HIDDEN_CATEGORIES_KEY = 'm3_hidden_categories';
 const EXPORT_SETTINGS_KEY = 'm3_export_settings';
 
 const DEFAULT_CATEGORIES: Category[] = [
@@ -66,6 +67,7 @@ const DEFAULT_CATEGORIES: Category[] = [
 export function ExpenseProvider({ children }: { children: ReactNode }) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+    const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
     const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('monthly');
     const [customRange, setCustomRange] = useState<{ start: string; end: string } | null>(null);
     const [exportSettings, setExportSettingsState] = useState<ExportSettings>({ frequency: 'off', lastExport: 0 });
@@ -73,12 +75,16 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const storedExpenses = localStorage.getItem(EXPENSES_KEY);
         const storedCategories = localStorage.getItem(CATEGORIES_KEY);
+        const storedHiddenCategories = localStorage.getItem(HIDDEN_CATEGORIES_KEY);
         const storedExport = localStorage.getItem(EXPORT_SETTINGS_KEY);
 
         if (storedExpenses) setExpenses(JSON.parse(storedExpenses));
         if (storedCategories) {
             const parsed = JSON.parse(storedCategories);
             setCategories([...DEFAULT_CATEGORIES, ...parsed]);
+        }
+        if (storedHiddenCategories) {
+            setHiddenCategoryIds(JSON.parse(storedHiddenCategories));
         }
         if (storedExport) setExportSettingsState(JSON.parse(storedExport));
     }, []);
@@ -127,7 +133,17 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
     const deleteCategory = (id: string) => {
         // Deleting category does not delete expenses (requirement)
-        saveCategories(categories.filter(c => c.id !== id || !c.isCustom));
+        const categoryToDelete = categories.find(c => c.id === id);
+        if (!categoryToDelete) return;
+
+        if (categoryToDelete.isCustom) {
+            saveCategories(categories.filter(c => c.id !== id || !c.isCustom));
+        } else {
+            // It's a default category, hide it
+            const newHidden = [...hiddenCategoryIds, id];
+            setHiddenCategoryIds(newHidden);
+            localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(newHidden));
+        }
     };
 
     const exportData = (format: 'json' | 'csv') => {
@@ -235,9 +251,13 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
     const currentMonthTotal = useMemo(() => currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0), [currentMonthExpenses]);
 
+    const visibleCategories = useMemo(() => {
+        return categories.filter(c => !hiddenCategoryIds.includes(c.id));
+    }, [categories, hiddenCategoryIds]);
+
     return (
         <ExpenseContext.Provider value={{
-            expenses, categories, filterPeriod, customRange,
+            expenses, categories: visibleCategories, filterPeriod, customRange,
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
             deleteExpense, addCategory, deleteCategory, filteredExpenses,
             homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,

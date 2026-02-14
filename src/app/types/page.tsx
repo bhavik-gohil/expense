@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, X, Smile } from "lucide-react";
 import { useExpenses } from "@/contexts/ExpenseContext";
-import { M3Card, M3Button } from "@/components/m3-ui";
+import { GlassCard, GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
 export default function ManageTypes() {
@@ -45,7 +45,7 @@ export default function ManageTypes() {
     ];
 
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header className="px-6 pt-14 pb-6 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-10">
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
@@ -56,18 +56,18 @@ export default function ManageTypes() {
 
             <div className="px-6 space-y-6">
                 {!isAdding ? (
-                    <M3Card
+                    <GlassCard
                         onClick={() => setIsAdding(true)}
-                        className="flex items-center justify-center gap-2 py-6 border-2 border-dashed border-outline/20 bg-transparent shadow-none"
+                        className="flex items-center justify-center gap-2 py-6 border-2 border-dashed border-border-color bg-transparent shadow-none cursor-pointer hover:bg-surface-container"
                     >
                         <Plus size={20} className="text-primary" />
                         <span className="font-semibold text-primary">Create New Type</span>
-                    </M3Card>
+                    </GlassCard>
                 ) : (
-                    <M3Card className="p-6 space-y-5">
+                    <GlassCard className="p-6 space-y-5">
                         <div className="flex justify-between items-center">
-                            <h2 className="font-bold text-lg">New Category</h2>
-                            <button onClick={() => { setIsAdding(false); setCustomEmoji(""); }} className="p-1.5 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
+                            <h2 className="font-bold text-lg text-text-main">New Category</h2>
+                            <button onClick={() => { setIsAdding(false); setCustomEmoji(""); }} className="p-1.5 hover:bg-surface-container rounded-full active:scale-90 transition-transform text-text-muted hover:text-text-main">
                                 <X size={20} />
                             </button>
                         </div>
@@ -75,14 +75,14 @@ export default function ManageTypes() {
                         <form onSubmit={handleAdd} className="space-y-5">
                             {/* Emoji preview */}
                             <div className="flex flex-col items-center gap-3">
-                                <div className="text-5xl p-4 bg-tertiary-container rounded-3xl w-24 h-24 flex items-center justify-center">
+                                <div className="text-5xl p-4 bg-surface-container rounded-3xl w-24 h-24 flex items-center justify-center border border-border-color">
                                     {emoji}
                                 </div>
                             </div>
 
                             {/* Quick pick emojis */}
                             <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block px-1">Quick Pick</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2 block px-1">Quick Pick</span>
                                 <div className="flex flex-wrap gap-1.5">
                                     {commonEmojis.map(e => (
                                         <button
@@ -92,8 +92,8 @@ export default function ManageTypes() {
                                             className={cn(
                                                 "w-10 h-10 flex items-center justify-center rounded-xl text-xl transition-all active:scale-90",
                                                 emoji === e && !customEmoji
-                                                    ? "bg-secondary-container ring-2 ring-secondary scale-105"
-                                                    : "hover:bg-surface-container-high"
+                                                    ? "bg-black text-white dark:bg-white dark:text-black scale-105 shadow-sm"
+                                                    : "bg-surface border border-border-color hover:bg-surface-container text-text-main"
                                             )}
                                         >
                                             {e}
@@ -102,44 +102,40 @@ export default function ManageTypes() {
                                 </div>
                             </div>
 
-                            {/* Custom emoji input */}
                             <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block px-1">Or Type Any Emoji</span>
                                 <div className="flex items-center gap-3">
                                     <div className="relative flex-1">
-                                        <Smile size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-40" />
+                                        <Smile size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                                         <input
                                             type="text"
                                             value={customEmoji}
                                             onChange={(e) => handleCustomEmojiInput(e.target.value)}
                                             placeholder="Paste or type emoji…"
-                                            className="w-full bg-surface-container rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-primary text-lg transition-all"
+                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-lg transition-all text-text-main placeholder:text-text-muted/50"
                                         />
                                     </div>
                                     {customEmoji && (
-                                        <div className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center text-xl shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-xl shrink-0 border border-border-color">
                                             {emoji}
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Category name */}
                             <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block px-1">Name</span>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     placeholder="e.g. Groceries"
-                                    className="w-full bg-surface-container rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary transition-all"
+                                    className="w-full bg-surface border border-border-color rounded-2xl p-4 outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 transition-all text-text-main placeholder:text-text-muted/50"
                                     required
                                 />
                             </div>
 
-                            <M3Button className="w-full py-3">Create Category</M3Button>
+                            <GlassButton className="w-full py-3">Create Category</GlassButton>
                         </form>
-                    </M3Card>
+                    </GlassCard>
                 )}
 
                 <div className="space-y-4">
@@ -151,14 +147,12 @@ export default function ManageTypes() {
                             <div key={cat.id} className="flex items-center gap-4 p-4 bg-surface-container rounded-2xl">
                                 <span className="text-2xl">{cat.emoji}</span>
                                 <span className="flex-1 font-semibold text-sm">{cat.name}</span>
-                                {cat.isCustom && (
-                                    <button
-                                        onClick={() => deleteCategory(cat.id)}
-                                        className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-full active:scale-90 transition-all"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => deleteCategory(cat.id)}
+                                    className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-full active:scale-90 transition-all"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
                             </div>
                         ))}
                     </div>

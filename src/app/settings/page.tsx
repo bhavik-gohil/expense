@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Upload, FileJson, FileSpreadsheet, Bell, BellOff, Clock, Sun, Moon, Monitor, Check } from "lucide-react";
 import { useExpenses, ExportFrequency } from "@/contexts/ExpenseContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { M3Card } from "@/components/m3-ui";
+import { GlassCard } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
 type ThemeOption = { label: string; value: "system" | "light" | "dark"; icon: any };
@@ -40,13 +40,12 @@ export default function Settings() {
             setImportResult("Import failed — invalid file format");
             setTimeout(() => setImportResult(null), 4000);
         }
-        // Reset the input so the same file can be re-selected
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
-            <header className="px-6 pt-14 pb-6 flex items-center gap-4 sticky top-0 bg-surface/80 backdrop-blur-md z-10">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
+            <header className="px-6 pt-14 pb-6 flex items-center gap-4 sticky top-0 bg-transparent backdrop-blur-md z-10">
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
                     <ArrowLeft size={24} />
                 </button>
@@ -54,9 +53,8 @@ export default function Settings() {
             </header>
 
             <div className="px-6 space-y-8">
-                {/* Theme Section */}
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Appearance
                     </h2>
                     <div className="grid grid-cols-3 gap-3">
@@ -65,26 +63,25 @@ export default function Settings() {
                                 key={t.value}
                                 onClick={() => setTheme(t.value)}
                                 className={cn(
-                                    "p-4 rounded-2xl flex flex-col items-center gap-2 transition-all cursor-pointer border-2",
+                                    "p-4 rounded-2xl flex flex-col items-center gap-2 transition-all cursor-pointer border backdrop-blur-sm shadow-sm",
                                     theme === t.value
-                                        ? "bg-primary-container border-primary text-on-primary-container scale-[1.02]"
-                                        : "bg-surface-container border-transparent hover:bg-surface-container-high"
+                                        ? "bg-primary/20 border-primary text-primary font-bold scale-[1.05]"
+                                        : "bg-surface border-border-color hover:bg-black/5 dark:hover:bg-white/5"
                                 )}
                             >
                                 <t.icon size={22} />
-                                <span className="text-xs font-bold">{t.label}</span>
+                                <span className="text-xs">{t.label}</span>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* Auto Export Section */}
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Auto Export
                     </h2>
-                    <M3Card className="p-4 space-y-4">
-                        <p className="text-xs text-on-surface-variant px-1 border-l-2 border-primary ml-1 leading-relaxed">
+                    <GlassCard className="p-4 space-y-4">
+                        <p className="text-xs text-text-muted px-1 border-l-2 border-primary ml-1 leading-relaxed opacity-70">
                             Automatically trigger a download based on your selected frequency.
                         </p>
                         <div className="grid grid-cols-2 gap-3">
@@ -93,64 +90,62 @@ export default function Settings() {
                                     key={f.value}
                                     onClick={() => setExportSettings({ ...exportSettings, frequency: f.value })}
                                     className={cn(
-                                        "p-3 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border-2",
+                                        "p-3 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border backdrop-blur-sm",
                                         exportSettings.frequency === f.value
-                                            ? "bg-secondary-container border-secondary text-on-secondary-container"
-                                            : "bg-surface-container border-transparent hover:bg-surface-container-high"
+                                            ? "bg-primary/20 border-primary text-primary font-bold"
+                                            : "bg-black/5 dark:bg-white/5 border-transparent hover:bg-black/10 dark:hover:bg-white/10"
                                     )}
                                 >
                                     <f.icon size={18} />
-                                    <span className="text-[11px] font-bold">{f.label}</span>
+                                    <span className="text-[11px] font-medium">{f.label}</span>
                                 </div>
                             ))}
                         </div>
                         {exportSettings.lastExport > 0 && (
-                            <p className="text-[10px] text-center text-on-surface-variant italic">
+                            <p className="text-[10px] text-center text-text-muted italic opacity-50">
                                 Last export: {new Date(exportSettings.lastExport).toLocaleDateString()}
                             </p>
                         )}
-                    </M3Card>
+                    </GlassCard>
                 </section>
 
-                {/* Manual Export Section */}
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Export
                     </h2>
                     <div className="space-y-3">
-                        <M3Card
+                        <GlassCard
                             onClick={() => exportData('json')}
-                            className="flex items-center gap-4 p-4 hover:bg-surface-container-high cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
-                            <div className="w-11 h-11 rounded-2xl bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0 shadow-inner">
                                 <FileJson size={22} />
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-sm">Export as JSON</p>
-                                <p className="text-[11px] text-on-surface-variant">Recommended for backups</p>
+                                <p className="text-[11px] text-text-muted opacity-70">Recommended for backups</p>
                             </div>
-                            <Download size={18} className="text-on-surface-variant opacity-30 shrink-0" />
-                        </M3Card>
+                            <Download size={18} className="text-text-muted opacity-30 shrink-0" />
+                        </GlassCard>
 
-                        <M3Card
+                        <GlassCard
                             onClick={() => exportData('csv')}
-                            className="flex items-center gap-4 p-4 hover:bg-surface-container-high cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
-                            <div className="w-11 h-11 rounded-2xl bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0">
+                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-600/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-inner">
                                 <FileSpreadsheet size={22} />
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-sm">Export as CSV</p>
-                                <p className="text-[11px] text-on-surface-variant">View in Excel or Sheets</p>
+                                <p className="text-[11px] text-text-muted opacity-70">View in Excel or Sheets</p>
                             </div>
-                            <Download size={18} className="text-on-surface-variant opacity-30 shrink-0" />
-                        </M3Card>
+                            <Download size={18} className="text-text-muted opacity-30 shrink-0" />
+                        </GlassCard>
                     </div>
                 </section>
 
-                {/* Import Section */}
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Import
                     </h2>
                     <input
@@ -160,18 +155,18 @@ export default function Settings() {
                         onChange={handleImport}
                         className="hidden"
                     />
-                    <M3Card
+                    <GlassCard
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-4 p-4 hover:bg-surface-container-high cursor-pointer active:scale-[0.98] transition-all"
+                        className="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer active:scale-[0.98] transition-all"
                     >
-                        <div className="w-11 h-11 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-600/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-inner">
                             <Upload size={22} />
                         </div>
                         <div className="flex-1">
                             <p className="font-bold text-sm">Import from JSON</p>
-                            <p className="text-[11px] text-on-surface-variant">Restore a previous backup</p>
+                            <p className="text-[11px] text-text-muted opacity-70">Restore a previous backup</p>
                         </div>
-                    </M3Card>
+                    </GlassCard>
                     {importResult && (
                         <div className="mt-3 flex items-center gap-2 text-sm font-medium text-primary px-2 animate-in fade-in">
                             <Check size={16} />
@@ -181,7 +176,7 @@ export default function Settings() {
                 </section>
 
                 <div className="pt-6 opacity-30 text-center">
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Expense Tracker · M3</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest">Expense Tracker · v2.0</p>
                 </div>
             </div>
         </main>

@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Trash2, ChevronRight, LayoutGrid } from "lucide-react";
+import { ArrowLeft, Trash2, ChevronRight, LayoutGrid, TrendingDown, TrendingUp, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useExpenses } from "@/contexts/ExpenseContext";
-import { M3Card, M3Button } from "@/components/m3-ui";
+import { GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 
 function AddExpenseContent() {
@@ -13,32 +13,41 @@ function AddExpenseContent() {
     const editId = searchParams.get("edit");
     const { expenses, categories, addExpense, updateExpense, deleteExpense } = useExpenses();
 
-    const [amount, setAmount] = useState("");
-    const [categoryId, setCategoryId] = useState("");
-    const [description, setDescription] = useState("");
-    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [formData, setFormData] = useState({
+        amount: "",
+        categoryId: "",
+        description: "",
+        date: new Date().toISOString().split("T")[0],
+        type: 'expense'
+    });
+
+    // Derived state for back-compat
+    const isEditing = !!editId;
 
     useEffect(() => {
         if (editId) {
             const expense = expenses.find((e) => e.id === editId);
             if (expense) {
-                setAmount(expense.amount.toString());
-                setCategoryId(expense.categoryId);
-                setDescription(expense.description);
-                setDate(expense.date);
+                setFormData({
+                    amount: expense.amount.toString(),
+                    categoryId: expense.categoryId,
+                    description: expense.description,
+                    date: expense.date,
+                    type: 'expense'
+                });
             }
         }
     }, [editId, expenses]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!categoryId || !amount) return;
+        if (!formData.categoryId || !formData.amount) return;
 
         const data = {
-            amount: parseFloat(amount),
-            categoryId,
-            description,
-            date,
+            amount: parseFloat(formData.amount),
+            categoryId: formData.categoryId,
+            description: formData.description,
+            date: formData.date,
         };
 
         if (editId) {
@@ -57,7 +66,7 @@ function AddExpenseContent() {
     };
 
     return (
-        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-12">
+        <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-10">
                 <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full">
                     <ArrowLeft size={24} />
@@ -73,26 +82,42 @@ function AddExpenseContent() {
             </header>
 
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
-                {/* Amount Input */}
                 <div className="text-center py-8">
-                    <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Amount</span>
                     <input
                         type="number"
                         step="0.01"
                         placeholder="0.00"
                         autoFocus
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="w-full text-center text-6xl font-bold bg-transparent outline-none placeholder:opacity-20"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                        className="w-full text-center text-5xl font-bold bg-transparent outline-none placeholder:opacity-20 text-text-main"
                         required
                     />
                 </div>
 
-                {/* Category Selection — Meow-style compact icon grid */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="relative">
+                        <input
+                            type="date"
+                            required
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            className="w-full bg-surface border border-border-color rounded-2xl py-3 pl-12 pr-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-text-main dark:[color-scheme:dark]"
+                        />
+                    </div>
+                    <input
+                        type="text"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Add a note..."
+                        className="w-full bg-surface border border-border-color rounded-2xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 placeholder:text-text-muted/50 text-text-main"
+                    />
+                </div>
+
                 <section>
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Category</h2>
-                        <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant px-1">Category</h2>
+                        <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1 px-1">
                             <LayoutGrid size={16} />
                             <span>Manage</span>
                         </Link>
@@ -101,10 +126,10 @@ function AddExpenseContent() {
                         {categories.map((cat) => (
                             <div
                                 key={cat.id}
-                                onClick={() => setCategoryId(cat.id)}
+                                onClick={() => setFormData({ ...formData, categoryId: cat.id })}
                                 className={cn(
                                     "flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all cursor-pointer",
-                                    categoryId === cat.id
+                                    formData.categoryId === cat.id
                                         ? "bg-secondary-container text-on-secondary-container scale-105 shadow-md ring-2 ring-secondary"
                                         : "bg-surface-container hover:bg-surface-container-high text-on-surface"
                                 )}
@@ -116,32 +141,13 @@ function AddExpenseContent() {
                     </div>
                 </section>
 
-                {/* Description & Date */}
-                <div className="space-y-4">
-                    <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Description</span>
-                        <input
-                            type="text"
-                            placeholder="Lunch with friends..."
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full bg-surface-container rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary transition-all"
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Date</span>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="w-full bg-surface-container rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary transition-all"
-                        />
-                    </div>
-                </div>
 
-                <M3Button className="w-full py-4 text-lg shadow-lg">
-                    {editId ? "Update" : "Save"}
-                </M3Button>
+
+                <div className="flex gap-3">
+                    <GlassButton type="submit" className="flex-1 text-base">
+                        {isEditing ? 'Update' : 'Add'}
+                    </GlassButton>
+                </div>
             </form>
         </main>
     );
