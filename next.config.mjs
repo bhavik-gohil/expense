@@ -2,8 +2,8 @@
 const nextConfig = {
   output: "export",
   images: { unoptimized: true },
-  // basePath: "/expense",
-  // trailingSlash: true,
+  basePath: "/expense",
+  trailingSlash: true,
 };
 
 export default nextConfig;
