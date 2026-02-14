@@ -13,4 +13,4 @@ pages:
       - out
   publish: out
   only:
-    - next
+    - main
