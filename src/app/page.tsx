@@ -44,8 +44,8 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
             <p className="text-5xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
           </div>
-          <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm">
-            <img src="/favicon.ico" alt="Logo" className="w-8 h-8 opacity-100" />
+          <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+            💵
           </div>
         </div>
       </header>

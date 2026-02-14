@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BarChart3, Settings } from "lucide-react";
@@ -8,11 +9,11 @@ import { cn } from "@/lib/utils";
 export function BottomNav() {
     const pathname = usePathname();
 
-    const navItems = [
+    const navItems = useMemo(() => [
         { label: "Home", icon: Home, href: "/" },
         { label: "Stats", icon: BarChart3, href: "/stats" },
         { label: "Settings", icon: Settings, href: "/settings" },
-    ];
+    ], []);
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-[100] pt-0 pointer-events-none flex justify-center">

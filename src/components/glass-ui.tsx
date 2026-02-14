@@ -63,10 +63,10 @@ export const GlassMetric = ({ label, value, icon: Icon, trend }: { label: string
 );
 
 export const GlassFAB = ({ onClick, icon }: { onClick: () => void, icon: React.ReactNode }) => (
-    <div className="fixed bottom-24 right-5 z-40 pointer-events-auto">
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-5 pointer-events-none z-40 flex justify-end">
         <button
             onClick={onClick}
-            className="w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200"
+            className="w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 pointer-events-auto"
         >
             {icon}
         </button>
