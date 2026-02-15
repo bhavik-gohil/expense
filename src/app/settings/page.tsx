@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/date";
 
 export default function Settings() {
     const router = useRouter();
-    const { exportData, importData, exportSettings, setExportSettings } = useExpenses();
+    const { exportData, importData, exportSettings, setExportSettings, updateExportPath } = useExpenses();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importResult, setImportResult] = useState<string | null>(null);
 
@@ -40,13 +40,30 @@ export default function Settings() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
             >
                 <h1 className="text-xl font-bold">Settings</h1>
             </header>
 
             <div className="px-6 pt-4 space-y-8">
+                <section>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
+                        Export Path
+                    </h2>
+                    <GlassCard className="p-3 space-y-2">
+                        <p className="text-[10px] text-text-muted opacity-60 mt-1 truncate pr-8">
+                            {exportSettings.exportPath || 'Exported to Downloads folder by default.'}
+                        </p>
+                        <button
+                            onClick={updateExportPath}
+                            className="px-4 py-2 bg-zinc-100 rounded-3xl text-xs font-bold text-primary active:scale-95 transition-all"
+                        >
+                            Update export path
+                        </button>
+
+                    </GlassCard>
+                </section>
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
                         Auto Export
@@ -79,6 +96,7 @@ export default function Settings() {
                         )}
                     </GlassCard>
                 </section>
+
 
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
@@ -147,9 +165,17 @@ export default function Settings() {
                 </section>
 
                 <div className="pt-6 text-center">
-                    <p className="text-[12px]">Simple and Secure : Data is stored locally on your device.</p>
-                    <p className="mt-2 text-[12px] opacity-60 font-bold ">Visit @ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
-                    <p className="mt-2 text-[10px] opacity-40 font-bold uppercase tracking-widest">Okane · v1.0</p>
+                    <div className="mt-2 flex flex-col items-center">
+                        <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+                            💵
+                        </div>
+                        <div className="flex ">
+                            <p className="text-xs font-semibold tracking-wider text-green-600 mt-1 pr-1">Okane</p>
+                            <p className="text-xs font-semibold tracking-wider text-gray-400 pr-1">v1.0</p>
+                        </div>
+                    </div>
+                    <p className="mt-2text-[12px] text-gray-500">Your Data. Your Device. Period.</p>
+                    <p className="mt-2 text-[12px] text-gray-500 ">Visit @ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
                 </div>
             </div>
         </main>

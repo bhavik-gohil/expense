@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 const CHART_COLORS = [
     "#7C4DFF", "#FF6D00", "#00BFA5", "#F50057",
@@ -17,7 +18,7 @@ import { formatDate, formatFullMonth } from "@/lib/date";
 
 export default function Stats() {
     const router = useRouter();
-    const { expenses, categories } = useExpenses();
+    const { expenses, allCategories } = useExpenses();
 
     const [monthOffset, setMonthOffset] = useState(0);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -36,7 +37,7 @@ export default function Stats() {
     const calendarData = useMemo(() => {
         const y = selectedMonth.getFullYear();
         const m = selectedMonth.getMonth();
-        const firstDay = new Date(y, m, 1).getDay(); 
+        const firstDay = new Date(y, m, 1).getDay();
         const daysInMonth = new Date(y, m + 1, 0).getDate();
         const todayStr = new Date().toDateString();
 
@@ -71,14 +72,14 @@ export default function Stats() {
     const chartData = useMemo(() => {
         const map: Record<string, { name: string; emoji: string; value: number }> = {};
         monthExpenses.forEach(exp => {
-            const cat = categories.find(c => c.id === exp.categoryId);
+            const cat = allCategories.find(c => c.id === exp.categoryId);
             const name = cat?.name || 'Other';
             const emoji = cat?.emoji || '💰';
             if (!map[name]) map[name] = { name, emoji, value: 0 };
             map[name].value += exp.amount;
         });
         return Object.values(map).sort((a, b) => b.value - a.value);
-    }, [monthExpenses, categories]);
+    }, [monthExpenses, allCategories]);
 
     const momData = useMemo(() => {
         const months: { month: string; amount: number; sortKey: string }[] = [];
@@ -100,11 +101,11 @@ export default function Stats() {
             });
         }
         return months;
-    }, [expenses, selectedMonth]);    
+    }, [expenses, selectedMonth]);
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="!bg-surface border border-border-color rounded-xl p-3 shadow-2xl ring-1 ring-black/10 dark:ring-white/20 opacity-100">
+                <div className="!bg-surface border border-border-color rounded-xl p-3 shadow-2xl ring-1 ring-black/10 opacity-100">
                     {label && <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1">{label}</p>}
                     <p className="text-sm font-black text-text-main">
                         {payload[0].name}: {payload[0].value.toFixed(2)}
@@ -118,7 +119,7 @@ export default function Stats() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md"
+                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
             >
                 <h1 className="text-xl font-bold">Statistics</h1>
@@ -223,16 +224,12 @@ export default function Stats() {
                                     return (
                                         <GlassCard key={item.name} className="p-4 flex flex-col gap-3">
                                             <div className="flex items-center gap-3">
-                                                <div
-                                                    className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-xl shrink-0"
-                                                >
-                                                    {item.emoji}
-                                                </div>
+                                                <CategoryIcon emoji={item.emoji} size="sm" />
                                                 <span className="font-bold text-sm flex-1 truncate">{item.name}</span>
                                                 <span className="text-xs font-bold text-text-muted">{pct.toFixed(0)}%</span>
                                                 <span className="font-black text-sm tabular-nums">{item.value.toFixed(2)}</span>
                                             </div>
-                                            <div className="h-2 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shadow-inner">
+                                            <div className="h-2 rounded-full bg-black/5 overflow-hidden shadow-inner">
                                                 <div
                                                     className="h-full rounded-full transition-all duration-500 shadow-sm"
                                                     style={{

@@ -11,7 +11,11 @@ npm run build
 
 # 2. Sync files with Capacitor
 echo "🔄 Syncing assets to Android project..."
+export CAPACITOR_ANDROID_STUDIO_PATH="/snap/bin/android-studio"
 npx cap sync android
+
+# npx cap sync /snap/bin/android-studio
+
 
 echo "✅ Build and Sync complete!"
 echo "🛠️ To open the project in Android Studio, run: npx cap open android"

@@ -21,6 +21,6 @@ export const formatShortDate = (date: string | Date) => {
     return getFormatter({ weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(date));
 };
 
-export const formatTime = (date: string | Date) => {
+export const formatTime = (date: string | Date | number) => {
     return getFormatter({ hour: '2-digit', minute: '2-digit' }).format(new Date(date));
 };

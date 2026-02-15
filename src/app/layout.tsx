@@ -24,7 +24,7 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen flex justify-center no-scrollbar relative overflow-x-hidden bg-page`}
       >
         <div
-          className="w-full max-w-2xl min-h-screen relative border-x border-border-color bg-page shadow-xl text-text-main"
+          className="w-full min-h-screen relative bg-page text-text-main"
         >
           <ExpenseProvider>
             <AutoExport />

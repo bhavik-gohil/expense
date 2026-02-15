@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Trash2, ChevronRight, LayoutGrid, TrendingDown, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, Trash2, LayoutGrid, Check, CheckCheck } from "lucide-react";
 import Link from "next/link";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 function AddExpenseContent() {
     const router = useRouter();
@@ -66,30 +67,37 @@ function AddExpenseContent() {
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
-            <header
-                className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md"
-                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
-            >
-                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full">
-                    <ArrowLeft size={24} />
-                </button>
-                <h1 className="text-xl font-medium">{editId ? "Edit" : "New"}</h1>
-                {editId ? (
-                    <button onClick={handleDelete} className="p-2 text-error hover:bg-error/10 rounded-full">
-                        <Trash2 size={24} />
-                    </button>
-                ) : (
-                    <div className="w-10" />
-                )}
-            </header>
-
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
+                <header
+                    className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-md"
+                    style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+                >
+                    <div>
+                        <button onClick={() => router.back()} className="p-3 -mx-2 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                            <ArrowLeft size={24} />
+                        </button>
+                    </div>
+                    <div className="flex justify-center">
+                        <h1 className="text-xl font-bold">{editId ? "Edit" : "New"}</h1>
+                    </div>
+                    <div className="-mx-2 flex justify-end gap-2">
+                        {editId && (
+                            <button className="p-3  bg-red-300 rounded-full active:scale-90 transition-transform" onClick={handleDelete}>
+                                <Trash2 size={24} />
+                            </button>
+                        )}
+                        <button type="submit" className="p-3 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                            {isEditing ? <CheckCheck size={24} /> : <Check size={24} />}
+                        </button>
+                    </div>
+
+                </header>
+
                 <div className="text-center py-4">
                     <input
                         type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        autoFocus
+                        placeholder="0"
+                        // autoFocus
                         value={formData.amount}
                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         className="w-full text-center text-5xl font-bold bg-transparent outline-none placeholder:opacity-20 text-text-main"
@@ -97,58 +105,54 @@ function AddExpenseContent() {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="relative">
+                <div className="">
+                    <div className="my-3">
                         <input
                             type="date"
                             required
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            className="w-full bg-surface border border-border-color rounded-2xl py-3 pl-3 pr-3 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 text-text-main dark:[color-scheme:dark]"
+                            // placeholder={formData.date === String(new Date().toISOString().split("T")[0]) ? "Today" : formData.date}
+                            className="w-full bg-surface border border-border-color rounded-3xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 text-text-main"
                         />
                     </div>
-                    <input
-                        type="text"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Add a note..."
-                        className="w-full bg-surface border border-border-color rounded-2xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 placeholder:text-text-muted/50 text-text-main"
-                    />
+                    <div className="my-3">
+                        <input
+                            type="text"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Add a note..."
+                            className="w-full bg-surface border border-border-color rounded-3xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 placeholder:text-text-muted/50 text-text-main"
+                        />
+                    </div>
                 </div>
 
                 <section>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-3">
                         {categories.map((cat) => (
                             <div
                                 key={cat.id}
                                 onClick={() => setFormData({ ...formData, categoryId: cat.id })}
                                 className={cn(
-                                    "flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all cursor-pointer border-2 border-transparent",
+                                    "flex flex-col items-center gap-1 mx-2 px-1 py-3 rounded-3xl cursor-pointer border-2 border-transparent",
                                     formData.categoryId === cat.id
-                                        ? "bg-primary/5 border-primary scale-105"
+                                        ? "border-2 border-zinc-400 border-dashed"
                                         : "hover:bg-text-main/5"
                                 )}
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
-                                    {cat.emoji}
-                                </div>
+                                <CategoryIcon emoji={cat.emoji} />
                                 <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="flex justify-center items-center my-6">
+
+                    <div className="flex justify-center items-end my-8">
                         <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1 px-1">
                             <LayoutGrid size={16} />
                             <span>Manage Categories</span>
                         </Link>
                     </div>
                 </section>
-
-                <div className="flex gap-3">
-                    <GlassButton type="submit" className="flex-1 text-base">
-                        {isEditing ? 'Update' : 'Add'}
-                    </GlassButton>
-                </div>
             </form>
         </main>
     );

@@ -9,7 +9,7 @@ import { formatShortDate, formatFullMonth } from "@/lib/date";
 
 export default function Home() {
   const router = useRouter();
-  const { homeExpenses, currentMonthTotal, categories } = useExpenses();
+  const { homeExpenses, currentMonthTotal, allCategories } = useExpenses();
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, typeof homeExpenses> = {};
@@ -40,13 +40,13 @@ export default function Home() {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
-            <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal.toFixed(2)}</p>
+            <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal}</p>
           </div>
           <div className="flex flex-col items-end">
-            <p className="text-xs font-semibold tracking-wider text-green-600 mb-1 pr-1">Okane</p>
             <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
               💵
             </div>
+            <p className="text-xs font-semibold tracking-wider text-green-700 mt-1 pr-1">Okane</p>
           </div>
         </div>
       </header>
@@ -66,7 +66,7 @@ export default function Home() {
                   {dateLabel}
                 </h3>
                 <span className="text-xs font-bold tabular-nums text-on-surface-variant">
-                  {dayTotal.toFixed(2)}
+                  {dayTotal}
                 </span>
               </div>
               <div className="flex flex-col gap-3">
@@ -74,7 +74,7 @@ export default function Home() {
                   <ExpenseItem
                     key={item.id}
                     expense={item}
-                    category={categories.find(c => c.id === item.categoryId)}
+                    category={allCategories.find(c => c.id === item.categoryId)}
                   />
                 ))}
               </div>

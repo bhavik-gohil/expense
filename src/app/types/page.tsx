@@ -1,187 +1,281 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2, X, Smile } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, X } from "lucide-react";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard, GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
+import { CategoryIcon } from "@/components/CategoryIcon";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    DragStartEvent,
+    DragEndEvent,
+    DragOverlay,
+    defaultDropAnimationSideEffects,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-const DEFAULT_QUICK_PICK = ["🍔", "🛒", "🚗", "🏠", "💡", "💊", "🎮", "🎁", "✈️"];
-const QUICK_PICK_KEY = "m3_quick_pick_emojis";
+interface SortableCategoryProps {
+    category: any;
+    selected: boolean;
+    onSelect: (id: string) => void;
+}
+
+function SortableCategory({ category, selected, onSelect }: SortableCategoryProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: category.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.3 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className={cn(
+                "flex flex-col items-center gap-1 p-3 rounded-3xl cursor-pointer border-2 border-dashed transition-all active:scale-95 touch-none",
+                selected
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-transparent bg-zinc-50 hover:bg-zinc-100"
+            )}
+            onClick={() => onSelect(category.id)}
+        >
+            <CategoryIcon emoji={category.emoji} />
+            <span className="text-[10px] font-bold truncate w-full text-center leading-tight text-text-main uppercase tracking-tighter">
+                {category.name}
+            </span>
+        </div>
+    );
+}
 
 export default function ManageTypes() {
     const router = useRouter();
-    const { categories, addCategory, deleteCategory } = useExpenses();
+    const { categories, addCategory, deleteCategory, reorderCategories } = useExpenses();
     const [name, setName] = useState("");
-    const [emoji, setEmoji] = useState("💰");
+    const [emoji, setEmoji] = useState("");
     const [isAdding, setIsAdding] = useState(false);
-    const [customEmoji, setCustomEmoji] = useState("");
-    const [quickPickEmojis, setQuickPickEmojis] = useState<string[]>(DEFAULT_QUICK_PICK);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [activeId, setActiveId] = useState<string | null>(null);
 
-    useEffect(() => {
-        const stored = localStorage.getItem(QUICK_PICK_KEY);
-        if (stored) {
-            try {
-                setQuickPickEmojis(JSON.parse(stored));
-            } catch (e) {
-                console.error("Failed to parse stored quick pick emojis", e);
-            }
-        }
-    }, []);
-
-    const saveQuickPick = (newList: string[]) => {
-        setQuickPickEmojis(newList);
-        localStorage.setItem(QUICK_PICK_KEY, JSON.stringify(newList));
-    };
-
-    const addToQuickPick = () => {
-        if (!customEmoji || quickPickEmojis.includes(customEmoji)) return;
-        const newList = [customEmoji, ...quickPickEmojis].slice(0, 20); 
-        saveQuickPick(newList);
-    };
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 5,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name.trim()) return;
-        addCategory({ name: name.trim(), emoji });
+        if (!name.trim() || !emoji.trim()) return;
+
+        // Extract only the first emoji/char if multiple entered
+        const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+        const matches = emoji.match(emojiRegex);
+        const finalEmoji = (matches && matches.length > 0) ? matches[0] : emoji.charAt(0);
+
+        addCategory({ name: name.trim(), emoji: finalEmoji });
         setName("");
-        setEmoji("💰");
-        setCustomEmoji("");
+        setEmoji("");
         setIsAdding(false);
     };
 
-    const handleCustomEmojiInput = (value: string) => {
-        const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
-        const matches = value.match(emojiRegex);
-        if (matches && matches.length > 0) {
-            const lastEmoji = matches[matches.length - 1];
-            setCustomEmoji(lastEmoji);
-            setEmoji(lastEmoji);
-        } else {
-            setCustomEmoji(value);
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveId(null);
+
+        if (over && active.id !== over.id) {
+            const oldIndex = categories.findIndex((cat) => cat.id === active.id);
+            const newIndex = categories.findIndex((cat) => cat.id === over.id);
+            const newOrder = arrayMove(categories, oldIndex, newIndex).map(c => c.id);
+            reorderCategories(newOrder);
+        }
+    };
+
+    const handleSelect = (id: string) => {
+        setSelectedId(prev => prev === id ? null : id);
+    };
+
+    const handleDelete = () => {
+        if (selectedId) {
+            deleteCategory(selectedId);
+            setSelectedId(null);
         }
     };
 
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 pt-14 pb-6 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md"
+                className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-md"
                 style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
             >
-                <button onClick={() => router.back()} className="p-2 -mx-2 hover:bg-surface-variant rounded-full active:scale-90 transition-transform">
-                    <ArrowLeft size={24} />
-                </button>
-                <h1 className="text-xl font-bold">Categories</h1>
-                <div className="w-10" />
+                <div className="flex items-center gap-3">
+                    <button onClick={() => router.back()} className="p-3 -mx-2 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                        <ArrowLeft size={24} />
+                    </button>
+                </div>
+                <div className="flex justify-center">
+                    <h1 className="text-xl font-bold">Categories</h1>
+                </div>
+                <div className="-mx-2 flex justify-end gap-2">
+                </div>
             </header>
 
-            <div className="px-6 space-y-6">
+            <div className="px-6 py-4 space-y-6">
                 {!isAdding ? (
                     <GlassCard
-                        onClick={() => setIsAdding(true)}
-                        className="flex items-center justify-center gap-2 py-6 border-2 border-dashed border-border-color bg-transparent shadow-none cursor-pointer hover:bg-surface-container"
+                        onClick={() => {
+                            setIsAdding(true);
+                            setSelectedId(null);
+                        }}
+                        className="flex items-center justify-center gap-2 py-3 rounded-3xl"
                     >
                         <Plus size={20} className="text-primary" />
-                        <span className="font-semibold text-primary">New Category</span>
+                        <span className="font-bold text-md tracking-widest text-primary">New Category</span>
                     </GlassCard>
                 ) : (
-                    <GlassCard className="p-6 space-y-5">
+                    <GlassCard className="p-6 pt-3 space-y-5 animate-in slide-in-from-top duration-300">
                         <div className="flex justify-between items-center">
-                            <h2 className="font-bold text-lg text-text-main">New Category</h2>
-                            <button onClick={() => { setIsAdding(false); setCustomEmoji(""); }} className="p-1.5 hover:bg-surface-container rounded-full active:scale-90 transition-transform text-text-muted hover:text-text-main">
-                                <X size={20} />
+                            <h2 className="font-black text-lg text-text-main">New Category</h2>
+                            <button onClick={() => setIsAdding(false)} className="p-3 -mx-1 bg-zinc-100 rounded-full active:scale-90 transition-transform">
+                                <X size={18} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleAdd} className="space-y-5">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="text-5xl p-4 bg-zinc-100 rounded-3xl w-24 h-24 flex items-center justify-center border border-border-color text-text-main transition-all">
-                                    {emoji}
+                        <form onSubmit={handleAdd} className="space-y-4">
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="col-span-1">
+                                    <input
+                                        type="text"
+                                        value={emoji}
+                                        onChange={(e) => setEmoji(e.target.value)}
+                                        placeholder="💰"
+                                        className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        required
+                                        maxLength={5}
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Category name"
+                                        className="w-full bg-zinc-50 border rounded-3xl p-2 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        required
+                                    />
                                 </div>
                             </div>
-
-                            <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3 block px-1">Quick Pick</span>
-                                <div className="grid grid-cols-5 gap-2">
-                                    {quickPickEmojis.map(e => (
-                                        <button
-                                            key={e}
-                                            type="button"
-                                            onClick={() => { setEmoji(e); setCustomEmoji(""); }}
-                                            className={cn(
-                                                "w-12 h-12 flex items-center justify-center rounded-2xl text-xl transition-all active:scale-90 border-2",
-                                                emoji === e && !customEmoji
-                                                    ? "bg-primary/5 border-primary scale-110 shadow-sm"
-                                                    : "bg-zinc-100 border-transparent text-text-main hover:bg-zinc-200"
-                                            )}
-                                        >
-                                            {e}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <div className="relative flex-1">
-                                        <Smile size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                                        <input
-                                            type="text"
-                                            value={customEmoji}
-                                            onChange={(e) => handleCustomEmojiInput(e.target.value)}
-                                            placeholder="Add Emoji"
-                                            className="w-full bg-surface border border-border-color rounded-2xl p-3 pl-9 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-text-main placeholder:text-text-muted/50"
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={addToQuickPick}
-                                        disabled={!customEmoji || quickPickEmojis.includes(customEmoji)}
-                                        className="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-all disabled:opacity-20"
-                                        title="Add to Quick Pick"
-                                    >
-                                        <Plus size={24} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Category name"
-                                    className="w-full bg-surface border border-border-color rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary/20 transition-all text-text-main placeholder:text-text-muted/50"
-                                    required
-                                />
-                            </div>
-
-                            <GlassButton className="w-full py-3">Create</GlassButton>
+                            <GlassButton className="w-full py-3 rounded-[2rem] text-sm uppercase tracking-widest font-black shadow-md mt-2">
+                                Create
+                            </GlassButton>
                         </form>
                     </GlassCard>
                 )}
 
                 <div className="space-y-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">
-                        Your Categories
-                    </h2>
-                    <div className="space-y-2">
-                        {categories.map(cat => (
-                            <div key={cat.id} className="flex items-center gap-4 py-3 px-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-[24px] shrink-0 self-center text-text-main">
-                                    {cat.emoji}
-                                </div>
-                                <span className="flex-1 font-semibold text-sm">{cat.name}</span>
+                    <div className="flex justify-between items-center h-4 px-1 my-8">
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+                            Your Categories
+                        </h2>
+
+                        <div className="">
+                            {selectedId && (
                                 <button
-                                    onClick={() => deleteCategory(cat.id)}
-                                    className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-full active:scale-90 transition-all"
+                                    onClick={handleDelete}
+                                    className="text-red-400"
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={24} />
                                 </button>
-                            </div>
-                        ))}
+                            )}
+                        </div>
                     </div>
+
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        onDragCancel={() => setActiveId(null)}
+                    >
+                        <SortableContext
+                            items={categories.map(c => c.id)}
+                            strategy={rectSortingStrategy}
+                        >
+                            <div className="grid grid-cols-3 gap-3">
+                                {categories.map(cat => (
+                                    <SortableCategory
+                                        key={cat.id}
+                                        category={cat}
+                                        selected={selectedId === cat.id}
+                                        onSelect={handleSelect}
+                                    />
+                                ))}
+                            </div>
+                        </SortableContext>
+                        <DragOverlay adjustScale={true} dropAnimation={{
+                            sideEffects: defaultDropAnimationSideEffects({
+                                styles: {
+                                    active: {
+                                        opacity: '0.5',
+                                    },
+                                },
+                            }),
+                        }}>
+                            {activeId ? (
+                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border-1 border-dashed bg-white shadow-2xl scale-110 transition-transform cursor-grabbing overflow-hidden">
+                                    <CategoryIcon emoji={categories.find(c => c.id === activeId)?.emoji || '💰'} />
+                                    <span className="text-[10px] font-bold truncate w-full text-center leading-tight text-text-main uppercase tracking-tighter">
+                                        {categories.find(c => c.id === activeId)?.name}
+                                    </span>
+                                </div>
+                            ) : null}
+                        </DragOverlay>
+                    </DndContext>
                 </div>
+            </div>
+
+            <div className="p-3 text-center">
+                <p className="text-[10px] font-medium text-text-muted opacity-50 uppercase tracking-widest">
+                    Hold and drag to reorder
+                </p>
             </div>
         </main>
     );

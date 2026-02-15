@@ -23,6 +23,8 @@ export type ExportFrequency = 'off' | 'daily' | 'weekly' | 'monthly';
 interface ExportSettings {
     frequency: ExportFrequency;
     lastExport: number;
+    exportPath?: string;
+    exportPathLabel?: string;
 }
 
 interface ExpenseContextType {
@@ -37,6 +39,8 @@ interface ExpenseContextType {
     deleteExpense: (id: string) => void;
     addCategory: (category: Omit<Category, 'id' | 'isCustom'>) => void;
     deleteCategory: (id: string) => void;
+    reorderCategories: (newOrder: string[]) => void;
+    allCategories: Category[];
     filteredExpenses: Expense[];
     homeExpenses: Expense[];
     totalForPeriod: number;
@@ -46,12 +50,14 @@ interface ExpenseContextType {
     importData: (file: File) => Promise<{ expenses: number; categories: number }>;
     exportSettings: ExportSettings;
     setExportSettings: (settings: ExportSettings) => void;
+    updateExportPath: () => Promise<boolean>;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
 const EXPENSES_KEY = 'm3_expenses';
 const CATEGORIES_KEY = 'm3_categories';
+const CATEGORY_ORDER_KEY = 'm3_category_order';
 const HIDDEN_CATEGORIES_KEY = 'm3_hidden_categories';
 const EXPORT_SETTINGS_KEY = 'm3_export_settings';
 
@@ -67,6 +73,7 @@ const DEFAULT_CATEGORIES: Category[] = [
 export function ExpenseProvider({ children }: { children: ReactNode }) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+    const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
     const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('monthly');
     const [customRange, setCustomRange] = useState<{ start: string; end: string } | null>(null);
@@ -75,6 +82,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const storedExpenses = localStorage.getItem(EXPENSES_KEY);
         const storedCategories = localStorage.getItem(CATEGORIES_KEY);
+        const storedOrder = localStorage.getItem(CATEGORY_ORDER_KEY);
         const storedHiddenCategories = localStorage.getItem(HIDDEN_CATEGORIES_KEY);
         const storedExport = localStorage.getItem(EXPORT_SETTINGS_KEY);
 
@@ -83,6 +91,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             const parsed = JSON.parse(storedCategories);
             setCategories([...DEFAULT_CATEGORIES, ...parsed]);
         }
+        if (storedOrder) setCategoryOrder(JSON.parse(storedOrder));
         if (storedHiddenCategories) {
             setHiddenCategoryIds(JSON.parse(storedHiddenCategories));
         }
@@ -103,6 +112,26 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     const setExportSettings = (settings: ExportSettings) => {
         setExportSettingsState(settings);
         localStorage.setItem(EXPORT_SETTINGS_KEY, JSON.stringify(settings));
+    };
+
+    const updateExportPath = async () => {
+        if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
+            try {
+                const { FilePicker } = await import('@capawesome/capacitor-file-picker');
+                const result = await FilePicker.pickDirectory();
+                if (result.path) {
+                    setExportSettings({
+                        ...exportSettings,
+                        exportPath: result.path,
+                        exportPathLabel: 'Selected Folder'
+                    });
+                    return true;
+                }
+            } catch (err) {
+                console.error('Failed to pick directory', err);
+            }
+        }
+        return false;
     };
 
     const addExpense = (expense: Omit<Expense, 'id' | 'timestamp'>) => {
@@ -131,17 +160,18 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         saveCategories([...categories, newCategory]);
     };
 
+    const reorderCategories = (newOrder: string[]) => {
+        setCategoryOrder(newOrder);
+        localStorage.setItem(CATEGORY_ORDER_KEY, JSON.stringify(newOrder));
+    };
+
     const deleteCategory = (id: string) => {
         const categoryToDelete = categories.find(c => c.id === id);
         if (!categoryToDelete) return;
 
-        if (categoryToDelete.isCustom) {
-            saveCategories(categories.filter(c => c.id !== id || !c.isCustom));
-        } else {
-            const newHidden = [...hiddenCategoryIds, id];
-            setHiddenCategoryIds(newHidden);
-            localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(newHidden));
-        }
+        const newHidden = [...hiddenCategoryIds, id];
+        setHiddenCategoryIds(newHidden);
+        localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(newHidden));
     };
 
     const exportData = async (format: 'json' | 'csv') => {
@@ -163,34 +193,54 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         // Handle Native Platform (Android/iOS)
         if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
             try {
-                const { Filesystem, Directory } = await import('@capacitor/filesystem');
+                const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
                 const { Share } = await import('@capacitor/share');
 
-                // 1. Attempt to write to public Download folder (Android only)
-                // If it fails (due to permissions), we fall back to Cache + Share
-                try {
-                    await Filesystem.writeFile({
-                        path: `Download/${filename}`,
-                        data: content,
-                        directory: Directory.ExternalStorage,
-                        encoding: (await import('@capacitor/filesystem')).Encoding.UTF8,
-                    });
-                    alert(`Saved to Downloads folder: ${filename}`);
-                } catch (saveErr) {
-                    console.log('Direct download failed, falling back to Share sheet', saveErr);
-                    // 2. Fallback: Write file to Cache and Share
-                    const result = await Filesystem.writeFile({
-                        path: filename,
-                        data: content,
-                        directory: Directory.Cache,
-                        encoding: (await import('@capacitor/filesystem')).Encoding.UTF8,
-                    });
+                let success = false;
 
-                    await Share.share({
-                        title: `Export ${format.toUpperCase()}`,
-                        url: result.uri,
-                        dialogTitle: 'Save or Share Export',
-                    });
+                // 1. Try saved custom path if exists
+                if (exportSettings.exportPath) {
+                    try {
+                        await Filesystem.writeFile({
+                            path: `${exportSettings.exportPath}/${filename}`,
+                            data: content,
+                            encoding: Encoding.UTF8,
+                        });
+                        success = true;
+                        alert(`Exported to: ${exportSettings.exportPathLabel}`);
+                    } catch (err) {
+                        console.error('Failed to write to custom path', err);
+                    }
+                }
+
+                // 2. Fallback to default Download folder if no custom path or custom path failed
+                if (!success) {
+                    try {
+                        await Filesystem.writeFile({
+                            path: `Download/${filename}`,
+                            data: content,
+                            directory: Directory.ExternalStorage,
+                            encoding: Encoding.UTF8,
+                        });
+                        success = true;
+                        alert(`Saved to Downloads folder: ${filename}`);
+                    } catch (saveErr) {
+                        console.log('Direct download failed, falling back to Share sheet', saveErr);
+
+                        // 3. Last fallback: Write file to Cache and Share
+                        const result = await Filesystem.writeFile({
+                            path: filename,
+                            data: content,
+                            directory: Directory.Cache,
+                            encoding: Encoding.UTF8,
+                        });
+
+                        await Share.share({
+                            title: `Export ${format.toUpperCase()}`,
+                            url: result.uri,
+                            dialogTitle: 'Save or Share Export',
+                        });
+                    }
                 }
             } catch (err) {
                 console.error('Failed to export natively', err);
@@ -302,16 +352,28 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     }, [expenses]);
 
     const visibleCategories = useMemo(() => {
-        return categories.filter(c => !hiddenCategoryIds.includes(c.id));
-    }, [categories, hiddenCategoryIds]);
+        const visible = categories.filter(c => !hiddenCategoryIds.includes(c.id));
+        if (categoryOrder.length === 0) return visible;
+
+        return [...visible].sort((a, b) => {
+            const indexA = categoryOrder.indexOf(a.id);
+            const indexB = categoryOrder.indexOf(b.id);
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+        });
+    }, [categories, hiddenCategoryIds, categoryOrder]);
+
+    const allCategories = useMemo(() => categories, [categories]);
 
     return (
         <ExpenseContext.Provider value={{
             expenses, categories: visibleCategories, filterPeriod, customRange,
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
-            deleteExpense, addCategory, deleteCategory, filteredExpenses,
-            homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
-            importData, exportSettings, setExportSettings
+            deleteExpense, addCategory, deleteCategory, reorderCategories, allCategories,
+            filteredExpenses, homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
+            importData, exportSettings, setExportSettings, updateExportPath
         }}>
             {children}
         </ExpenseContext.Provider>

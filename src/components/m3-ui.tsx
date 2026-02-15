@@ -33,14 +33,12 @@ export const M3Chip = ({ label, active, onClick }: { label: string, active?: boo
 );
 
 export const FAB = ({ onClick, icon }: { onClick: () => void, icon: React.ReactNode }) => (
-    <div className="fixed inset-0 flex justify-center pointer-events-none z-50">
-        <div className="w-full max-w-2xl relative">
-            <button
-                onClick={onClick}
-                className="absolute bottom-28 right-6 w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container shadow-2xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all pointer-events-auto"
-            >
-                {icon}
-            </button>
-        </div>
+    <div className="fixed bottom-28 right-6 pointer-events-none z-50">
+        <button
+            onClick={onClick}
+            className="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container shadow-2xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all pointer-events-auto"
+        >
+            {icon}
+        </button>
     </div>
 );

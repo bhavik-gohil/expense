@@ -6,8 +6,8 @@ export const GlassCard = ({ children, className, onClick }: { children: React.Re
     <div
         onClick={onClick}
         className={cn(
-            "relative overflow-hidden rounded-2xl transition-all duration-200 group minimal-card",
-            onClick && "cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]",
+            "relative overflow-hidden rounded-3xl transition-all duration-200 group minimal-card",
+            onClick && "cursor-pointer hover:bg-black/5 active:scale-[0.99]",
             className
         )}
     >
@@ -18,8 +18,8 @@ export const GlassCard = ({ children, className, onClick }: { children: React.Re
 export const GlassButton = ({ children, className, variant = 'primary', ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'danger' }) => {
     const variants = {
         primary: "bg-primary text-on-primary shadow-sm hover:opacity-90 active:scale-97",
-        ghost: "bg-transparent text-text-main hover:bg-black/5 dark:hover:bg-white/5",
-        danger: "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20"
+        ghost: "bg-transparent text-text-main hover:bg-black/5",
+        danger: "bg-red-50 text-red-600 hover:bg-red-100"
     };
 
     return (
@@ -62,7 +62,7 @@ export const GlassMetric = ({ label, value, icon: Icon, trend }: { label: string
 );
 
 export const GlassFAB = ({ onClick, icon }: { onClick: () => void, icon: React.ReactNode }) => (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-5 pointer-events-none z-40 flex justify-end">
+    <div className="fixed bottom-24 left-0 right-0 px-5 pointer-events-none z-40 flex justify-end">
         <button
             onClick={onClick}
             className="w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 pointer-events-auto"
