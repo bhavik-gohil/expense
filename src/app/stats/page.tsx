@@ -119,8 +119,7 @@ export default function Stats() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 backdrop-blur-md"
-                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
             >
                 <h1 className="text-xl font-bold">Statistics</h1>
             </header>

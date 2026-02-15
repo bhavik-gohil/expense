@@ -57,15 +57,15 @@ function SortableCategory({ category, selected, onSelect }: SortableCategoryProp
             {...attributes}
             {...listeners}
             className={cn(
-                "flex flex-col items-center gap-1 p-3 rounded-3xl cursor-pointer border-2 border-dashed transition-all active:scale-95 touch-none",
+                "flex flex-col items-center justify-center rounded-3xl cursor-pointer border-2 border-transparent w-24 h-24",
                 selected
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-transparent bg-zinc-50 hover:bg-zinc-100"
+                    ? "border-2 border-zinc-400 border-dotted"
+                    : "hover:bg-text-main/5"
             )}
             onClick={() => onSelect(category.id)}
         >
             <CategoryIcon emoji={category.emoji} />
-            <span className="text-[10px] font-bold truncate w-full text-center leading-tight text-text-main uppercase tracking-tighter">
+            <span className="mt-2 text-[10px] font-semibold truncate w-full text-center leading-tight">
                 {category.name}
             </span>
         </div>
@@ -82,15 +82,15 @@ export default function ManageTypes() {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8,
-            },
-        }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 200,
+                delay: 300,
                 tolerance: 5,
+            },
+        }),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 10,
             },
         }),
         useSensor(KeyboardSensor, {
@@ -143,11 +143,10 @@ export default function ManageTypes() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-md"
-                style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+                className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
             >
                 <div className="flex items-center gap-3">
-                    <button onClick={() => router.back()} className="p-3 -mx-2 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                    <button onClick={() => router.back()} className="p-3 -mx-2 shadow rounded-full active:scale-90 transition-transform">
                         <ArrowLeft size={24} />
                     </button>
                 </div>
@@ -168,42 +167,42 @@ export default function ManageTypes() {
                         className="flex items-center justify-center gap-2 py-3 rounded-3xl"
                     >
                         <Plus size={20} className="text-primary" />
-                        <span className="font-bold text-md tracking-widest text-primary">New Category</span>
+                        <span className="font-semibold text-md tracking-widest text-primary">New Category</span>
                     </GlassCard>
                 ) : (
-                    <GlassCard className="p-6 pt-3 space-y-5 animate-in slide-in-from-top duration-300">
+                    <GlassCard className="p-6 pt-4 space-y-5 animate-in slide-in-from-top duration-300">
                         <div className="flex justify-between items-center">
-                            <h2 className="font-black text-lg text-text-main">New Category</h2>
-                            <button onClick={() => setIsAdding(false)} className="p-3 -mx-1 bg-zinc-100 rounded-full active:scale-90 transition-transform">
+                            <span className="text-md font-semibold">New Category</span>
+                            <button onClick={() => setIsAdding(false)} className="p-4 -mx-1 shadow rounded-full active:scale-90 transition-transform">
                                 <X size={18} />
                             </button>
                         </div>
 
                         <form onSubmit={handleAdd} className="space-y-4">
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-4 gap-3">
                                 <div className="col-span-1">
                                     <input
                                         type="text"
                                         value={emoji}
                                         onChange={(e) => setEmoji(e.target.value)}
                                         placeholder="💰"
-                                        className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none transition-all"
                                         required
                                         maxLength={5}
                                     />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-3">
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="Category name"
-                                        className="w-full bg-zinc-50 border rounded-3xl p-2 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none transition-all"
                                         required
                                     />
                                 </div>
                             </div>
-                            <GlassButton className="w-full py-3 rounded-[2rem] text-sm uppercase tracking-widest font-black shadow-md mt-2">
+                            <GlassButton className="w-full py-3 rounded-[2rem] text-sm tracking-widest shadow-md mt-2">
                                 Create
                             </GlassButton>
                         </form>
@@ -211,10 +210,12 @@ export default function ManageTypes() {
                 )}
 
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center h-4 px-1 my-8">
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
-                            Your Categories
-                        </h2>
+                    <div className="flex justify-between items-center h-4 my-8 px-2">
+                        <div className="text-left">
+                            <p className="text-[10px] font-medium text-text-muted opacity-70 uppercase tracking-widest">
+                                Hold and drag to reorder categories
+                            </p>
+                        </div>
 
                         <div className="">
                             {selectedId && (
@@ -239,7 +240,7 @@ export default function ManageTypes() {
                             items={categories.map(c => c.id)}
                             strategy={rectSortingStrategy}
                         >
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-3 justify-items-center gap-1">
                                 {categories.map(cat => (
                                     <SortableCategory
                                         key={cat.id}
@@ -260,9 +261,9 @@ export default function ManageTypes() {
                             }),
                         }}>
                             {activeId ? (
-                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border-1 border-dashed bg-white shadow-2xl scale-110 transition-transform cursor-grabbing overflow-hidden">
+                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border border-dashed shadow-3xl scale-110 transition-transform cursor-grabbing overflow-hidden w-24 bg-surface/90 backdrop-blur-sm">
                                     <CategoryIcon emoji={categories.find(c => c.id === activeId)?.emoji || '💰'} />
-                                    <span className="text-[10px] font-bold truncate w-full text-center leading-tight text-text-main uppercase tracking-tighter">
+                                    <span className="text-[10px] truncate w-full text-center tracking-tighter">
                                         {categories.find(c => c.id === activeId)?.name}
                                     </span>
                                 </div>
@@ -272,11 +273,7 @@ export default function ManageTypes() {
                 </div>
             </div>
 
-            <div className="p-3 text-center">
-                <p className="text-[10px] font-medium text-text-muted opacity-50 uppercase tracking-widest">
-                    Hold and drag to reorder
-                </p>
-            </div>
+
         </main>
     );
 }

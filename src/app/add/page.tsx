@@ -69,11 +69,10 @@ function AddExpenseContent() {
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
                 <header
-                    className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-md"
-                    style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+                    className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
                 >
                     <div>
-                        <button onClick={() => router.back()} className="p-3 -mx-2 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                        <button onClick={() => router.back()} className="p-3 -mx-2 shadow rounded-full active:scale-90 transition-transform ">
                             <ArrowLeft size={24} />
                         </button>
                     </div>
@@ -86,7 +85,7 @@ function AddExpenseContent() {
                                 <Trash2 size={24} />
                             </button>
                         )}
-                        <button type="submit" className="p-3 bg-zinc-200 rounded-full active:scale-90 transition-transform">
+                        <button type="submit" className="p-3 shadow rounded-full active:scale-90 transition-transform">
                             {isEditing ? <CheckCheck size={24} /> : <Check size={24} />}
                         </button>
                     </div>
@@ -97,7 +96,6 @@ function AddExpenseContent() {
                     <input
                         type="number"
                         placeholder="0"
-                        // autoFocus
                         value={formData.amount}
                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         className="w-full text-center text-5xl font-bold bg-transparent outline-none placeholder:opacity-20 text-text-main"
@@ -113,7 +111,7 @@ function AddExpenseContent() {
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                             // placeholder={formData.date === String(new Date().toISOString().split("T")[0]) ? "Today" : formData.date}
-                            className="w-full bg-surface border border-border-color rounded-3xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 text-text-main"
+                            className="w-full bg-zinc-50 border border-border-color rounded-3xl py-3 px-4 font-medium outline-none text-text-main"
                         />
                     </div>
                     <div className="my-3">
@@ -122,31 +120,31 @@ function AddExpenseContent() {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Add a note..."
-                            className="w-full bg-surface border border-border-color rounded-3xl py-3 px-4 font-medium outline-none focus:ring-2 focus:ring-black/5 placeholder:text-text-muted/50 text-text-main"
+                            className="w-full bg-zinc-50 border border-border-color rounded-3xl py-3 px-4 font-medium outline-none text-text-main"
                         />
                     </div>
                 </div>
 
                 <section>
-                    <div className="grid grid-cols-3">
+                    <div className="grid grid-cols-3 justify-items-center gap-1">
                         {categories.map((cat) => (
                             <div
                                 key={cat.id}
                                 onClick={() => setFormData({ ...formData, categoryId: cat.id })}
                                 className={cn(
-                                    "flex flex-col items-center gap-1 mx-2 px-1 py-3 rounded-3xl cursor-pointer border-2 border-transparent",
+                                    "flex flex-col items-center justify-center rounded-3xl cursor-pointer border-2 border-transparent w-24 h-24",
                                     formData.categoryId === cat.id
-                                        ? "border-2 border-zinc-400 border-dashed"
+                                        ? "border-2 border-zinc-400 border-dotted"
                                         : "hover:bg-text-main/5"
                                 )}
                             >
                                 <CategoryIcon emoji={cat.emoji} />
-                                <span className="text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
+                                <span className="mt-2 text-[10px] font-semibold truncate w-full text-center leading-tight">{cat.name}</span>
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex justify-center items-end my-8">
+                    <div className="flex justify-center items-end my-4">
                         <Link href="/types" className="text-primary text-sm font-medium flex items-center gap-1 px-1">
                             <LayoutGrid size={16} />
                             <span>Manage Categories</span>

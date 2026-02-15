@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BarChart3, Settings } from "lucide-react";
+import { Home, BarChart3, Settings, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -16,8 +16,8 @@ export function BottomNav() {
     ], []);
 
     return (
-        <div className="fixed bottom-3 left-3 right-3 z-[100] pt-0 pointer-events-none flex justify-center ">
-            <nav className="w-full max-w-2xl rounded-full bg-surface/80 backdrop-blur-md border border-border-color pointer-events-auto flex items-center justify-around pb-3 pt-3 px-2 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
+        <div className="fixed bottom-3 left-3 right-3 z-[100] pointer-events-none flex justify-center items-center gap-3">
+            <nav className="h-14 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-around px-4 min-w-[260px]">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -25,12 +25,12 @@ export function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center w-16 transition-colors duration-200",
+                                "flex flex-col items-center justify-center w-16 transition-all duration-200",
                                 isActive ? "text-primary" : "text-text-muted hover:text-text-main"
                             )}
                         >
                             <item.icon
-                                size={26}
+                                size={24}
                                 strokeWidth={isActive ? 2.5 : 2}
                                 className="mb-0.5"
                             />
@@ -41,6 +41,13 @@ export function BottomNav() {
                     );
                 })}
             </nav>
+
+            <Link
+                href="/add"
+                className="w-14 h-14 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all shadow-sm"
+            >
+                <Plus size={30} strokeWidth={2.5} />
+            </Link>
         </div>
     );
 }

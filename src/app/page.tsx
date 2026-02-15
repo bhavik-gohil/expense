@@ -34,8 +34,7 @@ export default function Home() {
   return (
     <main className="flex min-h-full flex-col bg-surface text-on-surface pb-40">
       <header
-        className="px-6 py-6 sticky top-0 z-10 backdrop-blur-md"
-        style={{ backgroundColor: 'rgba(var(--bg-page), 0.8)' }}
+        className="px-6 py-6 sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
       >
         <div className="flex justify-between items-center">
           <div>
@@ -43,7 +42,7 @@ export default function Home() {
             <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal}</p>
           </div>
           <div className="flex flex-col items-end">
-            <div className="w-12 h-12 bg-surface rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+            <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
               💵
             </div>
             <p className="text-xs font-semibold tracking-wider text-green-700 mt-1 pr-1">Okane</p>
@@ -82,8 +81,6 @@ export default function Home() {
           ))
         )}
       </div>
-
-      <GlassFAB icon={<Plus size={24} />} onClick={() => router.push('/add')} />
     </main>
   );
 }
