@@ -171,7 +171,7 @@ export default function Settings() {
                         </div>
                         <div className="flex ">
                             <p className="text-xs font-semibold tracking-wider text-green-600 mt-1 pr-1">Okane</p>
-                            <p className="text-xs font-semibold tracking-wider text-gray-400 pr-1">v1.0</p>
+                            <p className="text-xs font-semibold tracking-wider text-gray-400 mt-1 pr-1">v1.0</p>
                         </div>
                     </div>
                     <p className="mt-2text-[12px] text-gray-500">Your Data. Your Device. Period.</p>
