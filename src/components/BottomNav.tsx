@@ -16,8 +16,8 @@ export function BottomNav() {
     ], []);
 
     return (
-        <div className="fixed bottom-3 left-3 right-3 z-[100] pointer-events-none flex justify-center items-center gap-3">
-            <nav className="h-14 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-around px-4 min-w-[260px]">
+        <div className="fixed bottom-4 left-4 right-3 z-[100] pointer-events-none flex justify-center items-center gap-3">
+            <nav className="h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-around p-1">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -25,7 +25,7 @@ export function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center w-16 transition-all duration-200",
+                                "flex flex-col items-center justify-center w-16 transition-all duration-200 mx-1",
                                 isActive ? "text-primary" : "text-text-muted hover:text-text-main"
                             )}
                         >
@@ -44,7 +44,7 @@ export function BottomNav() {
 
             <Link
                 href="/add"
-                className="w-14 h-14 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all shadow-sm"
+                className="w-16 h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all shadow-sm mx-1"
             >
                 <Plus size={30} strokeWidth={2.5} />
             </Link>

@@ -81,22 +81,15 @@ export default function ManageTypes() {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
 
-    const sensors = useSensors(
-        useSensor(TouchSensor, {
-            activationConstraint: {
-                delay: 300,
-                tolerance: 5,
-            },
-        }),
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 10,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+const sensors = useSensors(
+  useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 200,
+      tolerance: 12,
+    },
+  })
+);
+
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
