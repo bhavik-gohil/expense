@@ -81,7 +81,7 @@ function AddExpenseContent() {
                     </div>
                     <div className="-mx-2 flex justify-end gap-2">
                         {editId && (
-                            <button className="p-3  bg-red-300 rounded-full active:scale-90 transition-transform" onClick={handleDelete}>
+                            <button className="p-3 shadow text-red-500 rounded-full active:scale-90 transition-transform" onClick={handleDelete}>
                                 <Trash2 size={24} />
                             </button>
                         )}

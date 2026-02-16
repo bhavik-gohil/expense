@@ -81,15 +81,15 @@ export default function ManageTypes() {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
 
-const sensors = useSensors(
-  useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 200,
-      tolerance: 12,
-    },
-  })
-);
+    const sensors = useSensors(
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 12,
+            },
+        }),
 
+    );
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
@@ -181,7 +181,7 @@ const sensors = useSensors(
                                         placeholder="💰"
                                         className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none transition-all"
                                         required
-                                        maxLength={5}
+                                        maxLength={1}
                                     />
                                 </div>
                                 <div className="col-span-3">
@@ -203,18 +203,16 @@ const sensors = useSensors(
                 )}
 
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center h-4 my-8 px-2">
-                        <div className="text-left">
-                            <p className="text-[10px] font-medium text-text-muted opacity-70 uppercase tracking-widest">
-                                Hold and drag to reorder categories
-                            </p>
-                        </div>
+                    <div className="flex justify-between items-center h-4 my-10 px-2">
+                        <p className="text-[10px] font-medium text-text-muted opacity-70 uppercase tracking-widest">
+                            Hold and drag to reorder categories
+                        </p>
 
                         <div className="">
                             {selectedId && (
                                 <button
                                     onClick={handleDelete}
-                                    className="text-red-400"
+                                    className="p-3 shadow text-red-500 rounded-full active:scale-90 transition-transform"
                                 >
                                     <Trash2 size={24} />
                                 </button>
