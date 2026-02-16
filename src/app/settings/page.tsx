@@ -174,7 +174,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <p className="mt-2 text-xs text-gray-500">Your Data. On Your Device.</p>
-                    <p className="mt-2 text-xs text-gray-500 ">Visit @ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
+                    <p className="mt-2 text-xs text-gray-500 ">@ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
                 </div>
             </div>
         </main>

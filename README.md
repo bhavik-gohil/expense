@@ -1,3 +1,20 @@
+# 💵 Okane
+
+**Okane** is a simple and lightweight expense manager app designed to help you track your daily spending with clarity and ease.
+
+---
+
+## 📌 Features
+
+- ➕ Add expenses quickly
+- 📂 Categorize spending (Food, Transport, Bills, etc.)
+- 📊 View total expenses
+- 📅 Track expenses by date
+- 🗑️ Edit or delete entries
+
+---
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
