@@ -205,7 +205,7 @@ export default function ManageTypes() {
                 <div className="space-y-4">
                     <div className="flex justify-between items-center h-4 my-10 px-2">
                         <p className="text-[10px] font-medium text-text-muted opacity-70 uppercase tracking-widest">
-                            Hold and drag to reorder categories
+                            Hold and drag to reorder
                         </p>
 
                         <div className="">
