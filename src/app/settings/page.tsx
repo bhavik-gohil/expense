@@ -47,7 +47,7 @@ export default function Settings() {
 
             <div className="px-6 pt-4 space-y-8">
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
                         Backup Destination
                     </h2>
                     <GlassCard className="p-4 space-y-4">
@@ -64,7 +64,7 @@ export default function Settings() {
                     </GlassCard>
                 </section>
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
                         Auto Backup
                     </h2>
                     <GlassCard className="p-4 space-y-4">
@@ -98,7 +98,7 @@ export default function Settings() {
 
 
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
                         Backup
                     </h2>
                     <div className="space-y-3">
@@ -133,7 +133,7 @@ export default function Settings() {
                 </section>
 
                 <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4 px-1">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
                         Import
                     </h2>
                     <input

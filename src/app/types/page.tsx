@@ -181,7 +181,7 @@ export default function ManageTypes() {
                                         placeholder="💰"
                                         className="w-full bg-zinc-50 border rounded-3xl py-2 text-center outline-none transition-all"
                                         required
-                                        maxLength={1}
+                                        maxLength={10}
                                     />
                                 </div>
                                 <div className="col-span-3">
