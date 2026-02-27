@@ -42,7 +42,7 @@ export default function Home() {
             <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal}</p>
           </div>
           <div className="flex flex-col items-end">
-            <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+            <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center text-2xl">
               💵
             </div>
             <p className="text-xs font-semibold tracking-wider text-green-700 mt-1 pr-1">Okane</p>

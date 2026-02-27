@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { GlassCard } from "./glass-ui";
-import { formatTime } from "@/lib/date";
+import { formatDate, formatFullMonth, formatTime } from "@/lib/date";
 import { Category, Expense } from "@/contexts/ExpenseContext";
 import { CategoryIcon } from "./CategoryIcon";
 
@@ -11,10 +11,10 @@ interface ExpenseItemProps {
     category?: Category;
 }
 
-export const ExpenseItem = React.memo(({ expense, category }: ExpenseItemProps) => {
+export const ExpenseItem = React.memo(({ expense, category}: ExpenseItemProps) => {
     return (
         <Link href={`/add?edit=${expense.id}`} className="block group">
-            <GlassCard className="flex items-center content-between gap-4 p-3 group-hover:bg-white/20 transition-colors">
+            <GlassCard className="flex items-center content-between gap-4 p-3">
                 <CategoryIcon emoji={category?.emoji || '💰'} />
                 <div className="flex-1 min-w-0">
                     <p className="font-bold text-[15px] leading-tight truncate text-text-main">
@@ -24,7 +24,7 @@ export const ExpenseItem = React.memo(({ expense, category }: ExpenseItemProps) 
                         {expense.description}
                     </p>
                 </div>
-                <div className="flex flex-col items-end shrink-0">
+                <div className="flex flex-col items-end shrink-0 px-1">
                     <p className="font-black text-lg tabular-nums text-text-main">
                         {expense.amount}
                     </p>

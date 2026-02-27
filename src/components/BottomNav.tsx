@@ -44,7 +44,7 @@ export function BottomNav() {
 
             <Link
                 href="/add"
-                className="w-16 h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all shadow-sm mx-1"
+                className="w-16 h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all mx-1"
             >
                 <Plus size={30} strokeWidth={2.5} />
             </Link>

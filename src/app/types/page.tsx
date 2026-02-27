@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard, GlassButton } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
@@ -74,10 +74,10 @@ function SortableCategory({ category, selected, onSelect }: SortableCategoryProp
 
 export default function ManageTypes() {
     const router = useRouter();
-    const { categories, addCategory, deleteCategory, reorderCategories } = useExpenses();
+    const { categories, addCategory, updateCategory, deleteCategory, reorderCategories } = useExpenses();
     const [name, setName] = useState("");
     const [emoji, setEmoji] = useState("");
-    const [isAdding, setIsAdding] = useState(false);
+    const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -91,19 +91,23 @@ export default function ManageTypes() {
 
     );
 
-    const handleAdd = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim() || !emoji.trim()) return;
 
-        // Extract only the first emoji/char if multiple entered
         const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
         const matches = emoji.match(emojiRegex);
         const finalEmoji = (matches && matches.length > 0) ? matches[0] : emoji.charAt(0);
 
-        addCategory({ name: name.trim(), emoji: finalEmoji });
+        if (formMode === 'edit' && selectedId) {
+            updateCategory(selectedId, { name: name.trim(), emoji: finalEmoji });
+        } else {
+            addCategory({ name: name.trim(), emoji: finalEmoji });
+        }
         setName("");
         setEmoji("");
-        setIsAdding(false);
+        setFormMode(null);
+        setSelectedId(null);
     };
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -124,13 +128,31 @@ export default function ManageTypes() {
 
     const handleSelect = (id: string) => {
         setSelectedId(prev => prev === id ? null : id);
+        setFormMode(null);
     };
 
     const handleDelete = () => {
         if (selectedId) {
             deleteCategory(selectedId);
             setSelectedId(null);
+            setFormMode(null);
         }
+    };
+
+    const handleStartEdit = () => {
+        if (!selectedId) return;
+        const cat = categories.find(c => c.id === selectedId);
+        if (!cat) return;
+        setName(cat.name);
+        setEmoji(cat.emoji);
+        setFormMode('edit');
+    };
+
+    const handleCloseForm = () => {
+        setFormMode(null);
+        setName("");
+        setEmoji("");
+        if (formMode === 'edit') setSelectedId(null);
     };
 
     return (
@@ -139,7 +161,7 @@ export default function ManageTypes() {
                 className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
             >
                 <div className="flex items-center gap-3">
-                    <button onClick={() => router.back()} className="p-3 -mx-2 shadow rounded-full active:scale-90 transition-transform">
+                    <button onClick={() => router.back()} className="p-3 -mx-2 minimal-card rounded-full active:scale-90 transition-transform">
                         <ArrowLeft size={24} />
                     </button>
                 </div>
@@ -151,10 +173,10 @@ export default function ManageTypes() {
             </header>
 
             <div className="px-6 py-4 space-y-6">
-                {!isAdding ? (
+                {formMode === null ? (
                     <GlassCard
                         onClick={() => {
-                            setIsAdding(true);
+                            setFormMode('create');
                             setSelectedId(null);
                         }}
                         className="flex items-center justify-center gap-2 py-3 rounded-3xl"
@@ -165,13 +187,13 @@ export default function ManageTypes() {
                 ) : (
                     <GlassCard className="p-6 pt-4 space-y-5 animate-in slide-in-from-top duration-300">
                         <div className="flex justify-between items-center">
-                            <span className="text-md font-semibold">New Category</span>
-                            <button onClick={() => setIsAdding(false)} className="p-4 -mx-1 shadow rounded-full active:scale-90 transition-transform">
+                            <span className="text-md font-semibold">{formMode === 'edit' ? 'Edit Category' : 'New Category'}</span>
+                            <button onClick={handleCloseForm} className="p-4 -mx-1 minimal-card rounded-full active:scale-90 transition-transform">
                                 <X size={18} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleAdd} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-4 gap-3">
                                 <div className="col-span-1">
                                     <input
@@ -195,8 +217,8 @@ export default function ManageTypes() {
                                     />
                                 </div>
                             </div>
-                            <GlassButton className="w-full py-3 rounded-[2rem] text-sm tracking-widest shadow-md mt-2">
-                                Create
+                            <GlassButton className="w-full py-3 rounded-[2rem] text-sm tracking-widest mt-2">
+                                {formMode === 'edit' ? 'Save' : 'Create'}
                             </GlassButton>
                         </form>
                     </GlassCard>
@@ -208,14 +230,22 @@ export default function ManageTypes() {
                             Hold and drag to reorder
                         </p>
 
-                        <div className="">
+                        <div className="flex gap-2">
                             {selectedId && (
-                                <button
-                                    onClick={handleDelete}
-                                    className="p-3 shadow text-red-500 rounded-full active:scale-90 transition-transform"
-                                >
-                                    <Trash2 size={24} />
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleStartEdit}
+                                        className="p-3 minimal-card text-primary rounded-full active:scale-90 transition-transform"
+                                    >
+                                        <Pencil size={24} />
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="p-3 minimal-card text-red-500 rounded-full active:scale-90 transition-transform"
+                                    >
+                                        <Trash2 size={24} />
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -252,7 +282,7 @@ export default function ManageTypes() {
                             }),
                         }}>
                             {activeId ? (
-                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border border-dashed shadow-3xl scale-110 transition-transform cursor-grabbing overflow-hidden w-24 bg-surface/90 backdrop-blur-sm">
+                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border border-dashed scale-110 transition-transform cursor-grabbing overflow-hidden w-24 bg-surface/90 backdrop-blur-sm">
                                     <CategoryIcon emoji={categories.find(c => c.id === activeId)?.emoji || '💰'} />
                                     <span className="text-[10px] truncate w-full text-center tracking-tighter">
                                         {categories.find(c => c.id === activeId)?.name}

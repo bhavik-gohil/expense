@@ -18,7 +18,7 @@ export function CategoryIcon({ emoji, className, size = "md" }: CategoryIconProp
     return (
         <div
             className={cn(
-                "bg-zinc-100 flex items-center justify-center shadow-sm shrink-0 self-center text-text-main transition-transform",
+                "bg-zinc-100 flex items-center justify-center shrink-0 self-center text-text-main transition-transform",
                 sizeClasses[size],
                 className
             )}

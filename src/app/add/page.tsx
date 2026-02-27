@@ -72,7 +72,7 @@ function AddExpenseContent() {
                     className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
                 >
                     <div>
-                        <button onClick={() => router.back()} className="p-3 -mx-2 shadow rounded-full active:scale-90 transition-transform ">
+                        <button onClick={() => router.back()} className="p-3 -mx-2 minimal-card rounded-full active:scale-90 transition-transform ">
                             <ArrowLeft size={24} />
                         </button>
                     </div>
@@ -81,11 +81,11 @@ function AddExpenseContent() {
                     </div>
                     <div className="-mx-2 flex justify-end gap-2">
                         {editId && (
-                            <button className="p-3 shadow text-red-500 rounded-full active:scale-90 transition-transform" onClick={handleDelete}>
+                            <button className="p-3 minimal-card text-red-500 rounded-full active:scale-90 transition-transform" onClick={handleDelete}>
                                 <Trash2 size={24} />
                             </button>
                         )}
-                        <button type="submit" className="p-3 shadow rounded-full active:scale-90 transition-transform">
+                        <button type="submit" className="p-3 minimal-card rounded-full active:scale-90 transition-transform">
                             {isEditing ? <CheckCheck size={24} /> : <Check size={24} />}
                         </button>
                     </div>

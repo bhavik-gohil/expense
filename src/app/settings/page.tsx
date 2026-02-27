@@ -104,7 +104,7 @@ export default function Settings() {
                     <div className="space-y-3">
                         <GlassCard
                             onClick={() => exportData('json')}
-                            className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-3 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
                             <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-600/10 flex items-center justify-center text-green-600 shrink-0">
                                 <FileJson size={22} />
@@ -118,7 +118,7 @@ export default function Settings() {
 
                         <GlassCard
                             onClick={() => exportData('csv')}
-                            className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
+                            className="flex items-center gap-4 p-3 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                         >
                             <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-600/10 flex items-center justify-center text-blue-600 shrink-0">
                                 <FileSpreadsheet size={22} />
@@ -134,7 +134,7 @@ export default function Settings() {
 
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
-                        Import
+                        Restore
                     </h2>
                     <input
                         ref={fileInputRef}
@@ -145,13 +145,13 @@ export default function Settings() {
                     />
                     <GlassCard
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-4 p-4 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
+                        className="flex items-center gap-4 p-3 hover:bg-black/5 cursor-pointer active:scale-[0.98] transition-all"
                     >
                         <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-600/10 flex items-center justify-center text-indigo-600 shrink-0">
                             <Upload size={22} />
                         </div>
                         <div className="flex-1">
-                            <p className="font-bold text-sm">Import from JSON</p>
+                            <p className="font-bold text-sm">Restore from JSON</p>
                             <p className="text-xs text-text-muted opacity-70">Restore a previous backup</p>
                         </div>
                     </GlassCard>
@@ -164,16 +164,13 @@ export default function Settings() {
                 </section>
 
                 <div className="pt-6 text-center">
-                    <div className="mt-2 flex flex-col items-center">
-                        <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center shadow-sm text-2xl">
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center text-2xl">
                             💵
                         </div>
-                        <div className="flex ">
-                            <p className="text-xs font-semibold tracking-wider text-green-600 mt-1 pr-1">Okane</p>
-                            <p className="text-xs font-semibold tracking-wider text-gray-400 mt-1 pr-1">v1.0</p>
-                        </div>
+                        <p className="text-xs font-semibold tracking-wider text-green-700 mt-1">Okane</p>
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">Your Data. On Your Device.</p>
+                    <p className="mt-2 text-[11px] text-gray-500 uppercase">Your Data. On Your Device.</p>
                     <p className="mt-2 text-xs text-gray-500 ">@ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
                 </div>
             </div>

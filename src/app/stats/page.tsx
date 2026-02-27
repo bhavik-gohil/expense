@@ -7,6 +7,7 @@ import { useExpenses } from "@/contexts/ExpenseContext";
 import { GlassCard } from "@/components/glass-ui";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { CategoryExpensesSheet } from "@/components/CategoryExpensesSheet";
 
 const CHART_COLORS = [
     "#7C4DFF", "#FF6D00", "#00BFA5", "#F50057",
@@ -22,6 +23,7 @@ export default function Stats() {
 
     const [monthOffset, setMonthOffset] = useState(0);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const dateStripRef = useRef<HTMLDivElement>(null);
 
     const selectedMonth = useMemo(() => {
@@ -80,6 +82,20 @@ export default function Stats() {
         });
         return Object.values(map).sort((a, b) => b.value - a.value);
     }, [monthExpenses, allCategories]);
+
+    const selectedCategoryData = useMemo(() => {
+        if (!selectedCategory) return null;
+        const item = chartData.find(c => c.name === selectedCategory);
+        if (!item) return null;
+        const cat = allCategories.find(c => c.name === selectedCategory);
+        const catExpenses = monthExpenses
+            .filter(e => {
+                const eCat = allCategories.find(c => c.id === e.categoryId);
+                return eCat?.name === selectedCategory;
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return { info: item, expenses: catExpenses };
+    }, [selectedCategory, chartData, monthExpenses, allCategories]);
 
     const momData = useMemo(() => {
         const months: { month: string; amount: number; sortKey: string }[] = [];
@@ -217,11 +233,11 @@ export default function Stats() {
 
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">Breakdown</h2>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
                                 {chartData.map((item, i) => {
                                     const pct = monthTotal > 0 ? (item.value / monthTotal) * 100 : 0;
                                     return (
-                                        <GlassCard key={item.name} className="p-4 flex flex-col gap-3">
+                                        <GlassCard key={item.name} className="p-3 flex flex-col gap-3 rounded-3xl" onClick={() => setSelectedCategory(item.name)}>
                                             <div className="flex items-center gap-3">
                                                 <CategoryIcon emoji={item.emoji} size="sm" />
                                                 <span className="font-bold text-sm flex-1 truncate">{item.name}</span>
@@ -270,6 +286,13 @@ export default function Stats() {
                     </>
                 )}
             </div>
+
+            <CategoryExpensesSheet
+                category={selectedCategoryData ? { name: selectedCategoryData.info.name, emoji: selectedCategoryData.info.emoji, total: selectedCategoryData.info.value } : null}
+                expenses={selectedCategoryData?.expenses || []}
+                allCategories={allCategories}
+                onClose={() => setSelectedCategory(null)}
+            />
         </main>
     );
 }

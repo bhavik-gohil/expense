@@ -38,6 +38,7 @@ interface ExpenseContextType {
     updateExpense: (id: string, updates: Partial<Expense>) => void;
     deleteExpense: (id: string) => void;
     addCategory: (category: Omit<Category, 'id' | 'isCustom'>) => void;
+    updateCategory: (id: string, updates: Partial<Pick<Category, 'name' | 'emoji'>>) => void;
     deleteCategory: (id: string) => void;
     reorderCategories: (newOrder: string[]) => void;
     allCategories: Category[];
@@ -158,6 +159,10 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             isCustom: true,
         };
         saveCategories([...categories, newCategory]);
+    };
+
+    const updateCategory = (id: string, updates: Partial<Pick<Category, 'name' | 'emoji'>>) => {
+        saveCategories(categories.map(c => c.id === id ? { ...c, ...updates, isCustom: true } : c));
     };
 
     const reorderCategories = (newOrder: string[]) => {
@@ -371,7 +376,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         <ExpenseContext.Provider value={{
             expenses, categories: visibleCategories, filterPeriod, customRange,
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
-            deleteExpense, addCategory, deleteCategory, reorderCategories, allCategories,
+            deleteExpense, addCategory, updateCategory, deleteCategory, reorderCategories, allCategories,
             filteredExpenses, homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
             importData, exportSettings, setExportSettings, updateExportPath
         }}>
