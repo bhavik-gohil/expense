@@ -40,7 +40,7 @@ export default function Settings() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
+                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 backdrop-blur-sm"
             >
                 <h1 className="text-xl font-bold">Settings</h1>
             </header>
@@ -48,11 +48,11 @@ export default function Settings() {
             <div className="px-6 pt-4 space-y-8">
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
-                        Backup Destination
+                        Backup Folder
                     </h2>
                     <GlassCard className="p-4 space-y-4">
-                        <p className="text-xs text-text-muted opacity-60 truncate">
-                            {exportSettings.exportPath || 'Backed up to Downloads folder by default.'}
+                        <p className="text-xs text-text-muted opacity-60">
+                            {exportSettings.exportPath || 'Backed up to Downloads folder by default. Works only on App.'}
                         </p>
                         <button
                             onClick={updateExportPath}
@@ -111,7 +111,7 @@ export default function Settings() {
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-sm">Backup as JSON</p>
-                                <p className="text-xs text-text-muted opacity-70">Recommended for backups</p>
+                                <p className="text-xs text-text-muted opacity-70">Recommended for backups.</p>
                             </div>
                             <Download size={18} className="text-text-muted opacity-30 shrink-0" />
                         </GlassCard>
@@ -125,7 +125,7 @@ export default function Settings() {
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-sm">Backup as CSV</p>
-                                <p className="text-xs text-text-muted opacity-70">View in Excel or Sheets</p>
+                                <p className="text-xs text-text-muted opacity-70">View in Excel or Sheets.</p>
                             </div>
                             <Download size={18} className="text-text-muted opacity-30 shrink-0" />
                         </GlassCard>
@@ -152,7 +152,7 @@ export default function Settings() {
                         </div>
                         <div className="flex-1">
                             <p className="font-bold text-sm">Restore from JSON</p>
-                            <p className="text-xs text-text-muted opacity-70">Restore a previous backup</p>
+                            <p className="text-xs text-text-muted opacity-70">Restore a previous backup.</p>
                         </div>
                     </GlassCard>
                     {importResult && (
@@ -165,13 +165,13 @@ export default function Settings() {
 
                 <div className="pt-6 text-center">
                     <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center text-2xl">
+                        <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color shadow-lg flex items-center justify-center text-2xl ">
                             💵
                         </div>
-                        <p className="text-xs font-semibold tracking-wider text-green-700 mt-1">Okane</p>
+                        <p className="text-xs font-semibold tracking-wider text-green-700 mt-2">Kakeibo</p>
                     </div>
-                    <p className="mt-2 text-[11px] text-gray-500 uppercase">Your Data. On Your Device.</p>
-                    <p className="mt-2 text-xs text-gray-500 ">@ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
+                    <p className="mt-1 text-[11px] text-gray-500">Your data stays on your device.</p>
+                    <p className="mt-10 text-xs text-gray-500 ">@ <a className="underline text-blue-600" rel="stylesheet" href="https://bhavik.cc" target="_">bhavik.cc</a> </p>
                 </div>
             </div>
         </main>

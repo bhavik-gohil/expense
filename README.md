@@ -1,6 +1,6 @@
-# 💵 Okane
+# 💵 Kakeibo
 
-**Okane** is a simple and lightweight expense manager app designed to help you track your daily spending with clarity and ease.
+**Kakeibo** is a simple and lightweight expense manager app designed to help you track your daily spending with clarity and ease.
 
 ---
 

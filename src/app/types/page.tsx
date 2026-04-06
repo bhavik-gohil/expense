@@ -158,7 +158,7 @@ export default function ManageTypes() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
+                className="px-6 py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-sm"
             >
                 <div className="flex items-center gap-3">
                     <button onClick={() => router.back()} className="p-3 -mx-2 minimal-card rounded-full active:scale-90 transition-transform">
@@ -282,7 +282,7 @@ export default function ManageTypes() {
                             }),
                         }}>
                             {activeId ? (
-                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border border-dashed scale-110 transition-transform cursor-grabbing overflow-hidden w-24 bg-surface/90 backdrop-blur-sm">
+                                <div className="flex flex-col items-center gap-1 p-3 rounded-3xl border border-dashed scale-110 transition-transform cursor-grabbing overflow-hidden w-24 backdrop-blur-sm">
                                     <CategoryIcon emoji={categories.find(c => c.id === activeId)?.emoji || '💰'} />
                                     <span className="text-[10px] truncate w-full text-center tracking-tighter">
                                         {categories.find(c => c.id === activeId)?.name}

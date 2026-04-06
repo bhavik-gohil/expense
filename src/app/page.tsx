@@ -34,18 +34,18 @@ export default function Home() {
   return (
     <main className="flex min-h-full flex-col bg-surface text-on-surface pb-40">
       <header
-        className="px-6 py-6 sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
+        className="px-6 py-6 sticky top-0 z-10 backdrop-blur-sm"
       >
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">{monthLabel}</p>
             <p className="text-4xl font-extrabold tracking-tight text-text-main">{currentMonthTotal}</p>
           </div>
-          <div className="flex flex-col items-end">
-            <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color flex items-center justify-center text-2xl">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-zinc-50 rounded-2xl border border-border-color shadow-lg flex items-center justify-center text-2xl">
               💵
             </div>
-            <p className="text-xs font-semibold tracking-wider text-green-700 mt-1 pr-1">Okane</p>
+            <p className="text-xs font-semibold tracking-wider text-green-700 mt-2">Kakeibo</p>
           </div>
         </div>
       </header>

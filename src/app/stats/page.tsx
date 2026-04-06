@@ -124,7 +124,7 @@ export default function Stats() {
                 <div className="!bg-surface border border-border-color rounded-xl p-3 shadow-2xl ring-1 ring-black/10 opacity-100">
                     {label && <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1">{label}</p>}
                     <p className="text-sm font-black text-text-main">
-                        {payload[0].name}: {payload[0].value.toFixed(2)}
+                        {payload[0].name}: {payload[0].value}
                     </p>
                 </div>
             );
@@ -135,7 +135,7 @@ export default function Stats() {
     return (
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <header
-                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
+                className="px-6 py-6 flex items-center justify-center gap-4 sticky top-0 z-10 backdrop-blur-sm"
             >
                 <h1 className="text-xl font-bold">Statistics</h1>
             </header>
@@ -149,7 +149,7 @@ export default function Stats() {
                 </button>
                 <div className="text-center">
                     <p className="text-sm font-bold uppercase tracking-wider">{monthLabel}</p>
-                    <p className="text-3xl font-extrabold mt-1 tabular-nums">{monthTotal.toFixed(2)}</p>
+                    <p className="text-3xl font-extrabold mt-1 tabular-nums">{monthTotal}</p>
                 </div>
                 <button
                     onClick={() => setMonthOffset(p => Math.max(0, p - 1))}
@@ -226,7 +226,7 @@ export default function Stats() {
                                 </ResponsiveContainer>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Total</span>
-                                    <span className="text-xl font-extrabold tabular-nums">{monthTotal.toFixed(2)}</span>
+                                    <span className="text-xl font-extrabold tabular-nums">{monthTotal}</span>
                                 </div>
                             </div>
                         </GlassCard>
@@ -239,10 +239,10 @@ export default function Stats() {
                                     return (
                                         <GlassCard key={item.name} className="p-3 flex flex-col gap-3 rounded-3xl" onClick={() => setSelectedCategory(item.name)}>
                                             <div className="flex items-center gap-3">
-                                                <CategoryIcon emoji={item.emoji} size="sm" />
+                                                <CategoryIcon emoji={item.emoji} />
                                                 <span className="font-bold text-sm flex-1 truncate">{item.name}</span>
-                                                <span className="text-xs font-bold text-text-muted">{pct.toFixed(0)}%</span>
-                                                <span className="font-black text-sm tabular-nums">{item.value.toFixed(2)}</span>
+                                                <span className="text-xs font-bold text-text-muted">{pct.toFixed(2)}%</span>
+                                                <span className="font-black text-sm tabular-nums">{item.value}</span>
                                             </div>
                                             <div className="h-2 rounded-full bg-black/5 overflow-hidden shadow-inner">
                                                 <div

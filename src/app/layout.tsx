@@ -9,7 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Okane",
+  title: "Kakeibo",
   description: "Expense Tracker",
 };
 

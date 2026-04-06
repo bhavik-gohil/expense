@@ -121,10 +121,24 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
                 const { FilePicker } = await import('@capawesome/capacitor-file-picker');
                 const result = await FilePicker.pickDirectory();
                 if (result.path) {
+                    // Extract a usable relative path from the content URI
+                    // Content URIs look like: content://com.android.externalstorage.documents/tree/primary%3ADocuments
+                    let folderPath = result.path;
+                    let folderLabel = 'Selected Folder';
+                    try {
+                        const decoded = decodeURIComponent(result.path);
+                        const match = decoded.match(/primary[:|%3A](.*)/i);
+                        if (match && match[1]) {
+                            folderPath = match[1];
+                            folderLabel = folderPath;
+                        }
+                    } catch {
+                        // Keep original path if decoding fails
+                    }
                     setExportSettings({
                         ...exportSettings,
-                        exportPath: result.path,
-                        exportPathLabel: 'Selected Folder'
+                        exportPath: folderPath,
+                        exportPathLabel: folderLabel
                     });
                     return true;
                 }
@@ -209,6 +223,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
                         await Filesystem.writeFile({
                             path: `${exportSettings.exportPath}/${filename}`,
                             data: content,
+                            directory: Directory.ExternalStorage,
                             encoding: Encoding.UTF8,
                         });
                         success = true;

@@ -17,7 +17,7 @@ export function BottomNav() {
 
     return (
         <div className="fixed bottom-4 left-4 right-3 z-[100] pointer-events-none flex justify-center items-center gap-3">
-            <nav className="h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-around p-1">
+            <nav className="h-16 rounded-full pointer-events-auto flex items-center justify-around p-1 backdrop-blur-sm border border-white shadow-2xl">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -34,9 +34,6 @@ export function BottomNav() {
                                 strokeWidth={isActive ? 2.5 : 2}
                                 className="mb-0.5"
                             />
-                            <span className={cn("text-[10px] font-medium", isActive ? "font-bold" : "")}>
-                                {item.label}
-                            </span>
                         </Link>
                     );
                 })}
@@ -44,7 +41,7 @@ export function BottomNav() {
 
             <Link
                 href="/add"
-                className="w-16 h-16 rounded-full bg-surface/80 backdrop-blur-sm border border-border-color pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all mx-1"
+                className="w-16 h-16 rounded-full pointer-events-auto flex items-center justify-center text-text-main active:scale-90 transition-all mx-1 backdrop-blur-sm border border-white shadow-2xl"
             >
                 <Plus size={30} strokeWidth={2.5} />
             </Link>

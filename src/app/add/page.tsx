@@ -69,7 +69,7 @@ function AddExpenseContent() {
         <main className="flex min-h-screen flex-col bg-surface text-on-surface pb-40">
             <form onSubmit={handleSubmit} className="px-6 space-y-8">
                 <header
-                    className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 bg-surface/80 backdrop-blur-sm"
+                    className="py-6 grid grid-cols-3 grid-flow-col items-center sticky top-0 z-10 backdrop-blur-sm"
                 >
                     <div>
                         <button onClick={() => router.back()} className="p-3 -mx-2 minimal-card rounded-full active:scale-90 transition-transform ">
