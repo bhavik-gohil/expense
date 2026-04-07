@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/date";
 
 export default function Settings() {
     const router = useRouter();
-    const { exportData, importData, exportSettings, setExportSettings, updateExportPath } = useExpenses();
+    const { exportData, importData, exportSettings, setExportSettings } = useExpenses();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importResult, setImportResult] = useState<string | null>(null);
 
@@ -48,28 +48,11 @@ export default function Settings() {
             <div className="px-6 pt-4 space-y-8">
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
-                        Backup Folder
-                    </h2>
-                    <GlassCard className="p-4 space-y-4">
-                        <p className="text-xs text-text-muted opacity-60">
-                            {exportSettings.exportPath || 'Backed up to Downloads folder by default. Works only on App.'}
-                        </p>
-                        <button
-                            onClick={updateExportPath}
-                            className="px-4 py-2 bg-zinc-100 rounded-3xl text-xs font-bold text-primary active:scale-95 transition-all"
-                        >
-                            Update backup folder
-                        </button>
-
-                    </GlassCard>
-                </section>
-                <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 px-1">
                         Auto Backup
                     </h2>
                     <GlassCard className="p-4 space-y-4">
                         <p className="text-xs text-text-muted border-primary leading-relaxed opacity-70">
-                            Automatically trigger a backup based on your selected frequency.
+                            Automatically save a copy of your data to the <span className="font-bold">Download/Kakeibo</span> folder based on your selected frequency.
                         </p>
                         <div className="grid grid-cols-2 gap-3 items-center self-center">
                             {frequencies.map((f) => (

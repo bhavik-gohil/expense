@@ -23,8 +23,6 @@ export type ExportFrequency = 'off' | 'daily' | 'weekly' | 'monthly';
 interface ExportSettings {
     frequency: ExportFrequency;
     lastExport: number;
-    exportPath?: string;
-    exportPathLabel?: string;
 }
 
 interface ExpenseContextType {
@@ -51,7 +49,6 @@ interface ExpenseContextType {
     importData: (file: File) => Promise<{ expenses: number; categories: number }>;
     exportSettings: ExportSettings;
     setExportSettings: (settings: ExportSettings) => void;
-    updateExportPath: () => Promise<boolean>;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -115,63 +112,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(EXPORT_SETTINGS_KEY, JSON.stringify(settings));
     };
 
-    const updateExportPath = async () => {
-        if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
-            try {
-                const { FilePicker } = await import('@capawesome/capacitor-file-picker');
-                const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
-                const result = await FilePicker.pickDirectory();
-                if (result.path) {
-                    // Extract a usable relative path from the content URI
-                    let folderPath = '';
-                    let folderLabel = 'Selected Folder';
-                    try {
-                        const decoded = decodeURIComponent(result.path);
-                        const match = decoded.match(/primary[:|%3A](.+)/i);
-                        if (match && match[1]) {
-                            folderPath = match[1].replace(/^\/+|\/+$/g, '');
-                            folderLabel = folderPath;
-                        }
-                    } catch {
-                        // Keep empty path
-                    }
 
-                    if (!folderPath) {
-                        alert('Could not determine folder path. Using default Downloads folder.');
-                        return false;
-                    }
-
-                    // Write Test: Check if we have permission to write to this folder
-                    try {
-                        const testFile = `${folderPath}/.test_${Date.now()}`;
-                        await Filesystem.writeFile({
-                            path: testFile,
-                            data: 'test',
-                            directory: Directory.ExternalStorage,
-                            encoding: Encoding.UTF8
-                        });
-                        await Filesystem.deleteFile({
-                            path: testFile,
-                            directory: Directory.ExternalStorage
-                        });
-                    } catch (testErr) {
-                        console.error('Write test failed', testErr);
-                        alert('This folder is restricted by Android. Auto-backups will fallback to the "Download" folder. For best results, please choose a folder inside "Download".');
-                    }
-
-                    setExportSettings({
-                        ...exportSettings,
-                        exportPath: folderPath,
-                        exportPathLabel: folderLabel
-                    });
-                    return true;
-                }
-            } catch (err) {
-                console.error('Failed to pick directory', err);
-            }
-        }
-        return false;
-    };
 
     const addExpense = (expense: Omit<Expense, 'id' | 'timestamp'>) => {
         const newExpense: Expense = {
@@ -241,63 +182,46 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
 
                 let success = false;
 
-                // 1. Try saved custom path if exists
-                if (exportSettings.exportPath) {
+                // 1. Attempt to write to Download/Kakeibo
+                try {
+                    // Create if not exists
                     try {
-                        await Filesystem.writeFile({
-                            path: exportSettings.exportPath + '/' + filename,
-                            data: content,
+                        await Filesystem.mkdir({
+                            path: 'Download/Kakeibo',
                             directory: Directory.ExternalStorage,
-                            encoding: Encoding.UTF8,
+                            recursive: true
                         });
-                        success = true;
-                        if (!isAuto) alert(`Exported to: ${exportSettings.exportPathLabel || exportSettings.exportPath}`);
-                    } catch (err) {
-                        console.error('Failed to write to custom path:', exportSettings.exportPath, err);
-                        // For manual, we'll let it fall through to Downloads fallback
-                    }
+                    } catch (mErr) { }
+
+                    await Filesystem.writeFile({
+                        path: `Download/Kakeibo/${filename}`,
+                        data: content,
+                        directory: Directory.ExternalStorage,
+                        encoding: Encoding.UTF8,
+                    });
+                    success = true;
+                    if (!isAuto) alert(`Exported to: Download/Kakeibo/${filename}`);
+                } catch (err) {
+                    console.error('Failed to write to Download/Kakeibo:', err);
                 }
 
-                // 2. Fallback to default Download/Kakeibo folder if no custom path or custom path failed
-                if (!success) {
+                // 2. Last fallback: Write file to Cache and Share (for Manual only)
+                if (!success && !isAuto) {
                     try {
-                        // Create Kakeibo directory first
-                        try {
-                            await Filesystem.mkdir({
-                                path: 'Download/Kakeibo',
-                                directory: Directory.ExternalStorage,
-                                recursive: true
-                            });
-                        } catch (mkdirErr) {
-                            // Might already exist
-                        }
-
-                        await Filesystem.writeFile({
-                            path: `Download/Kakeibo/${filename}`,
+                        const result = await Filesystem.writeFile({
+                            path: filename,
                             data: content,
-                            directory: Directory.ExternalStorage,
+                            directory: Directory.Cache,
                             encoding: Encoding.UTF8,
                         });
-                        success = true;
-                        if (!isAuto) alert(`Saved to Downloads/Kakeibo folder: ${filename}`);
-                    } catch (saveErr) {
-                        console.log('Direct download failed, falling back to Share sheet', saveErr);
 
-                        // 3. Last fallback: Write file to Cache and Share
-                        if (!isAuto) {
-                            const result = await Filesystem.writeFile({
-                                path: filename,
-                                data: content,
-                                directory: Directory.Cache,
-                                encoding: Encoding.UTF8,
-                            });
-
-                            await Share.share({
-                                title: `Export ${format.toUpperCase()}`,
-                                url: result.uri,
-                                dialogTitle: 'Save or Share Export',
-                            });
-                        }
+                        await Share.share({
+                            title: `Export ${format.toUpperCase()}`,
+                            url: result.uri,
+                            dialogTitle: 'Save or Share Export',
+                        });
+                    } catch (shareErr) {
+                        console.error('Share failed', shareErr);
                     }
                 }
             } catch (err) {
@@ -431,7 +355,7 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
             setFilterPeriod, setCustomRange, addExpense, updateExpense,
             deleteExpense, addCategory, updateCategory, deleteCategory, reorderCategories, allCategories,
             filteredExpenses, homeExpenses, totalForPeriod, homeTotal, currentMonthTotal, exportData,
-            importData, exportSettings, setExportSettings, updateExportPath
+            importData, exportSettings, setExportSettings
         }}>
             {children}
         </ExpenseContext.Provider>
