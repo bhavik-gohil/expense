@@ -6,7 +6,7 @@ export const GlassCard = ({ children, className, onClick }: { children: React.Re
     <div
         onClick={onClick}
         className={cn(
-            "relative overflow-hidden rounded-3xl transition-all duration-200 group minimal-card",
+            "relative overflow-hidden rounded-3xl transition-all bg-zinc-50/15 border border-zinc-100/60 drop-shadow-sm",
             onClick && "cursor-pointer active:scale-[0.99]",
             className
         )}

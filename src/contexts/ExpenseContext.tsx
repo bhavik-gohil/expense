@@ -123,17 +123,23 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
                 if (result.path) {
                     // Extract a usable relative path from the content URI
                     // Content URIs look like: content://com.android.externalstorage.documents/tree/primary%3ADocuments
-                    let folderPath = result.path;
+                    let folderPath = '';
                     let folderLabel = 'Selected Folder';
                     try {
                         const decoded = decodeURIComponent(result.path);
-                        const match = decoded.match(/primary[:|%3A](.*)/i);
+                        const match = decoded.match(/primary[:|%3A](.+)/i);
                         if (match && match[1]) {
-                            folderPath = match[1];
+                            // Clean up: remove leading/trailing slashes
+                            folderPath = match[1].replace(/^\/+|\/+$/g, '');
                             folderLabel = folderPath;
                         }
                     } catch {
-                        // Keep original path if decoding fails
+                        // Keep empty path to fallback to Download
+                    }
+                    // If we couldn't extract a valid path, don't save an unusable one
+                    if (!folderPath) {
+                        alert('Could not determine folder path. Using default Downloads folder.');
+                        return false;
                     }
                     setExportSettings({
                         ...exportSettings,
@@ -221,15 +227,16 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
                 if (exportSettings.exportPath) {
                     try {
                         await Filesystem.writeFile({
-                            path: `${exportSettings.exportPath}/${filename}`,
+                            path: exportSettings.exportPath + '/' + filename,
                             data: content,
                             directory: Directory.ExternalStorage,
                             encoding: Encoding.UTF8,
                         });
                         success = true;
-                        alert(`Exported to: ${exportSettings.exportPathLabel}`);
+                        alert(`Exported to: ${exportSettings.exportPathLabel || exportSettings.exportPath}`);
                     } catch (err) {
-                        console.error('Failed to write to custom path', err);
+                        console.error('Failed to write to custom path:', exportSettings.exportPath, err);
+                        alert(`Failed to save to "${exportSettings.exportPathLabel}". Falling back to Downloads.`);
                     }
                 }
 
