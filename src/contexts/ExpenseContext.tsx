@@ -47,7 +47,7 @@ interface ExpenseContextType {
     totalForPeriod: number;
     homeTotal: number;
     currentMonthTotal: number;
-    exportData: (format: 'json' | 'csv') => void;
+    exportData: (format: 'json' | 'csv', isAuto?: boolean) => Promise<void>;
     importData: (file: File) => Promise<{ expenses: number; categories: number }>;
     exportSettings: ExportSettings;
     setExportSettings: (settings: ExportSettings) => void;
@@ -119,28 +119,46 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
             try {
                 const { FilePicker } = await import('@capawesome/capacitor-file-picker');
+                const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
                 const result = await FilePicker.pickDirectory();
                 if (result.path) {
                     // Extract a usable relative path from the content URI
-                    // Content URIs look like: content://com.android.externalstorage.documents/tree/primary%3ADocuments
                     let folderPath = '';
                     let folderLabel = 'Selected Folder';
                     try {
                         const decoded = decodeURIComponent(result.path);
                         const match = decoded.match(/primary[:|%3A](.+)/i);
                         if (match && match[1]) {
-                            // Clean up: remove leading/trailing slashes
                             folderPath = match[1].replace(/^\/+|\/+$/g, '');
                             folderLabel = folderPath;
                         }
                     } catch {
-                        // Keep empty path to fallback to Download
+                        // Keep empty path
                     }
-                    // If we couldn't extract a valid path, don't save an unusable one
+
                     if (!folderPath) {
                         alert('Could not determine folder path. Using default Downloads folder.');
                         return false;
                     }
+
+                    // Write Test: Check if we have permission to write to this folder
+                    try {
+                        const testFile = `${folderPath}/.test_${Date.now()}`;
+                        await Filesystem.writeFile({
+                            path: testFile,
+                            data: 'test',
+                            directory: Directory.ExternalStorage,
+                            encoding: Encoding.UTF8
+                        });
+                        await Filesystem.deleteFile({
+                            path: testFile,
+                            directory: Directory.ExternalStorage
+                        });
+                    } catch (testErr) {
+                        console.error('Write test failed', testErr);
+                        alert('This folder is restricted by Android. Auto-backups will fallback to the "Download" folder. For best results, please choose a folder inside "Download".');
+                    }
+
                     setExportSettings({
                         ...exportSettings,
                         exportPath: folderPath,
@@ -199,10 +217,10 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(newHidden));
     };
 
-    const exportData = async (format: 'json' | 'csv') => {
+    const exportData = async (format: 'json' | 'csv', isAuto: boolean = false) => {
         let content = '';
         const dateStr = new Date().toISOString().split('T')[0];
-        const filename = `okane-export-${dateStr}.${format}`;
+        const filename = `Kakeibo-export-${dateStr}.${format}`;
 
         if (format === 'json') {
             content = JSON.stringify({ expenses, categories }, null, 2);
@@ -233,40 +251,53 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
                             encoding: Encoding.UTF8,
                         });
                         success = true;
-                        alert(`Exported to: ${exportSettings.exportPathLabel || exportSettings.exportPath}`);
+                        if (!isAuto) alert(`Exported to: ${exportSettings.exportPathLabel || exportSettings.exportPath}`);
                     } catch (err) {
                         console.error('Failed to write to custom path:', exportSettings.exportPath, err);
-                        alert(`Failed to save to "${exportSettings.exportPathLabel}". Falling back to Downloads.`);
+                        // For manual, we'll let it fall through to Downloads fallback
                     }
                 }
 
-                // 2. Fallback to default Download folder if no custom path or custom path failed
+                // 2. Fallback to default Download/Kakeibo folder if no custom path or custom path failed
                 if (!success) {
                     try {
+                        // Create Kakeibo directory first
+                        try {
+                            await Filesystem.mkdir({
+                                path: 'Download/Kakeibo',
+                                directory: Directory.ExternalStorage,
+                                recursive: true
+                            });
+                        } catch (mkdirErr) {
+                            // Might already exist
+                        }
+
                         await Filesystem.writeFile({
-                            path: `Download/${filename}`,
+                            path: `Download/Kakeibo/${filename}`,
                             data: content,
                             directory: Directory.ExternalStorage,
                             encoding: Encoding.UTF8,
                         });
                         success = true;
-                        alert(`Saved to Downloads folder: ${filename}`);
+                        if (!isAuto) alert(`Saved to Downloads/Kakeibo folder: ${filename}`);
                     } catch (saveErr) {
                         console.log('Direct download failed, falling back to Share sheet', saveErr);
 
                         // 3. Last fallback: Write file to Cache and Share
-                        const result = await Filesystem.writeFile({
-                            path: filename,
-                            data: content,
-                            directory: Directory.Cache,
-                            encoding: Encoding.UTF8,
-                        });
+                        if (!isAuto) {
+                            const result = await Filesystem.writeFile({
+                                path: filename,
+                                data: content,
+                                directory: Directory.Cache,
+                                encoding: Encoding.UTF8,
+                            });
 
-                        await Share.share({
-                            title: `Export ${format.toUpperCase()}`,
-                            url: result.uri,
-                            dialogTitle: 'Save or Share Export',
-                        });
+                            await Share.share({
+                                title: `Export ${format.toUpperCase()}`,
+                                url: result.uri,
+                                dialogTitle: 'Save or Share Export',
+                            });
+                        }
                     }
                 }
             } catch (err) {

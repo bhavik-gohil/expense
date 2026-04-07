@@ -1,4 +1,4 @@
-package com.example.okane;
+package com.example.Kakeibo;
 
 import com.getcapacitor.BridgeActivity;
 

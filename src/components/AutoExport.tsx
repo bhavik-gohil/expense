@@ -26,7 +26,7 @@ export function AutoExport() {
         if (shouldExport) {
             console.log("Triggering auto-export...");
             const timer = setTimeout(() => {
-                exportData('json');
+                exportData('json', true);
             }, 3000);
             return () => clearTimeout(timer);
         }
